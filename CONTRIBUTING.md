@@ -7,7 +7,7 @@ Obrigado pelo interesse em contribuir com o Diary. Este projeto foi concebido em
 1. Faça um fork do repositório no GitHub.
 2. Clone seu fork para seu computador:
    ```bash
-   git clone https://github.com/SEU_USUARIO/diary.git
+   git clone https://github.com/Felipe-Takayuki/diary.git
    cd diary
    ```
 3. Crie uma branch para sua alteração:

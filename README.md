@@ -9,7 +9,7 @@
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-7fbbb3.svg" alt="License: MIT"></a>
   <a href="https://golang.org"><img src="https://img.shields.io/badge/Go-1.22+-83c092.svg" alt="Go 1.22+"></a>
-  <a href="https://github.com/takayuki/diary/actions"><img src="https://img.shields.io/badge/CI-Passing-a7c080.svg" alt="CI Status"></a>
+  <a href="https://github.com/Felipe-Takayuki/diary/actions"><img src="https://img.shields.io/badge/CI-Passing-a7c080.svg" alt="CI Status"></a>
   <img src="https://img.shields.io/badge/Dependencies-Zero-d3c6aa.svg" alt="Zero Dependencies">
 </p>
 
@@ -88,7 +88,7 @@ diary/
 Clone o repositório e execute diretamente:
 
 ```bash
-git clone https://github.com/SEU_USUARIO/diary.git
+git clone https://github.com/Felipe-Takayuki/diary.git
 cd diary
 go run .
 ```
