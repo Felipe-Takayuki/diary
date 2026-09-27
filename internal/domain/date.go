@@ -69,6 +69,27 @@ func (d Date) LegacyISO() string {
 	return d.t.Format(isoDateFormat)
 }
 
+// DateFromTime creates a Date from a time.Time value.
+func DateFromTime(t time.Time) Date {
+	return Date{
+		value: t.Format(CanonicalDateFormat),
+		t:     t,
+	}
+}
+
+// Today returns today's canonical Date.
+func Today() Date {
+	return DateFromTime(time.Now())
+}
+
+// AddDays returns a new Date offset by the specified number of days.
+func (d Date) AddDays(days int) Date {
+	if d.t.IsZero() {
+		return d
+	}
+	return DateFromTime(d.t.AddDate(0, 0, days))
+}
+
 // IsZero reports whether the date is unset.
 func (d Date) IsZero() bool {
 	return d.value == ""

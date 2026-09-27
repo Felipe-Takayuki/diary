@@ -56,7 +56,8 @@ diary/
 │   ├── usecase/                       # Casos de uso da aplicação
 │   │   └── daily_goal.go              # DailyGoalUseCase (GetDailyGoals, SaveDailyGoals)
 │   ├── adapter/                       # Adaptadores de entrada e saída
-│   │   ├── handler/http/              # Handlers HTTP, rotas de metas, tema e favicons
+│   │   ├── gui/                       # Interface Desktop Gráfica Nativa (Fyne + Omarchy Theme)
+│   │   ├── handler/http/              # Servidor HTTP alternativo (modo headless/web)
 │   │   ├── repository/markdown/       # Leitura e escrita concorrente de arquivos .md
 │   │   └── theme/                     # Integração com Omarchy colors.toml
 │   └── config/
@@ -65,10 +66,10 @@ diary/
 │   ├── embed.go                       # Arquivos estáticos embutidos via go:embed
 │   ├── static/                        # Favicon SVG e ICO
 │   └── template/
-│       └── index.html                 # Interface web (HTML, CSS e JavaScript nativo)
+│       └── index.html                 # Interface web alternativa
 ├── metas/                             # Diretório onde os arquivos diários são salvos
 ├── .github/workflows/ci.yml           # Validação automatizada em CI
-├── Makefile                           # Comandos de desenvolvimento e teste
+├── Makefile                           # Comandos de desenvolvimento, teste e instalação
 ├── CONTRIBUTING.md                    # Guia para novos contribuidores
 ├── LICENSE                            # Licença MIT
 ├── go.mod
@@ -77,13 +78,14 @@ diary/
 
 ---
 
-## Como executar
+## Como executar e instalar
 
 ### Pré-requisitos
 - Go 1.22 ou superior instalado.
+- Ambiente Linux com suporte a Wayland ou X11.
 
-### 1. Iniciar o servidor
-Clone o repositório e rode diretamente:
+### 1. Executar a Aplicação Desktop
+Clone o repositório e execute diretamente:
 
 ```bash
 git clone https://github.com/SEU_USUARIO/diary.git
@@ -91,14 +93,23 @@ cd diary
 go run .
 ```
 
-O servidor iniciará no endereço [http://localhost:8080](http://localhost:8080).
+A janela nativa do Diary abrirá diretamente no seu ambiente gráfico (Hyprland / Omarchy), com navegação por mouse e teclado.
 
-### 2. Compilar um binário único
-Para gerar um executável independente que contém a aplicação completa:
+### 2. Instalar no Sistema (Lançador do Omarchy)
+Para instalar o Diary como um aplicativo nativo no menu e lançadores do sistema (`rofi`, `walker` ou atalhos):
 
 ```bash
-make build
-./bin/diary
+make install
+```
+
+O comando compila o binário para `~/.local/bin/diary`, copia o atalho `.desktop` para `~/.local/share/applications/` e registra os ícones em alta resolução.
+
+### 3. Modo Web Alternativo (Opcional)
+Se desejar iniciar a versão web/headless no navegador:
+
+```bash
+./bin/diary --web
+# Ou acesse em http://localhost:8080
 ```
 
 ---

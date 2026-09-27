@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Diary
+GenericName=Metas Diárias
+Comment=Gerenciador minimalista de metas diárias local-first integrado ao Omarchy
+Exec=diary
+Icon=diary
+Terminal=false
+Categories=Utility;Office;Productivity;
+StartupNotify=true
+StartupWMClass=com.omarchy.diary

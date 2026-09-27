@@ -27,3 +27,11 @@ vet:
 
 clean:
 	rm -rf bin coverage.out coverage.html
+
+install: build
+	@mkdir -p $(HOME)/.local/bin $(HOME)/.local/share/applications $(HOME)/.local/share/icons/hicolor/scalable/apps $(HOME)/.local/share/icons/hicolor/64x64/apps
+	cp bin/diary $(HOME)/.local/bin/diary
+	cp assets/com.omarchy.diary.desktop $(HOME)/.local/share/applications/
+	cp assets/icon.svg $(HOME)/.local/share/icons/hicolor/scalable/apps/diary.svg
+	cp assets/icon.png $(HOME)/.local/share/icons/hicolor/64x64/apps/diary.png
+	@echo "Diary instalado com sucesso em $(HOME)/.local/bin/diary!"

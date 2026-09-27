@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
+	guiadapter "diary/internal/adapter/gui"
 	deliveryhttp "diary/internal/adapter/handler/http"
 	"diary/internal/adapter/repository/markdown"
 	"diary/internal/adapter/theme"
@@ -13,7 +15,7 @@ import (
 	"diary/web"
 )
 
-// Run bootstraps the application dependencies and starts the HTTP server.
+// Run bootstraps application dependencies and launches the native desktop app.
 func Run() error {
 	cfg := config.Load()
 
@@ -29,17 +31,29 @@ func Run() error {
 	// 3. Theme Service Adapter
 	themeService := theme.NewOmarchyService("")
 
-	// 4. Primary Adapter (HTTP Handler)
-	handler := deliveryhttp.NewHandler(dailyGoalUseCase, web.IndexHTML, themeService)
+	// Check if user specifically requested web server mode via CLI flag
+	if len(os.Args) > 1 && (os.Args[1] == "--web" || os.Args[1] == "-web" || os.Args[1] == "serve") {
+		return runWebServer(cfg, dailyGoalUseCase, themeService)
+	}
+
+	logDesktopBanner(cfg)
+
+	// 4. Primary Adapter (Native Desktop GUI)
+	desktopApp := guiadapter.NewDesktopApp(dailyGoalUseCase, themeService)
+	desktopApp.Run()
+
+	return nil
+}
+
+func runWebServer(cfg *config.Config, useCase usecase.DailyGoalUseCase, themeService theme.Service) error {
+	handler := deliveryhttp.NewHandler(useCase, web.IndexHTML, themeService)
 	handler.SetFavicon(web.FaviconSVG, web.FaviconICO)
 
-	// 5. Router setup
 	mux := http.NewServeMux()
 	handler.RegisterRoutes(mux)
 
-	logBanner(cfg)
+	logWebBanner(cfg)
 
-	// 5. HTTP Server startup
 	server := &http.Server{
 		Addr:    cfg.Addr(),
 		Handler: mux,
@@ -48,11 +62,17 @@ func Run() error {
 	return server.ListenAndServe()
 }
 
-func logBanner(cfg *config.Config) {
+func logDesktopBanner(cfg *config.Config) {
 	log.Printf("==================================================")
-	log.Printf(" Servidor de Metas Diárias iniciado com sucesso! ")
-	log.Printf(" Formato de datas: Dia-Mês-Ano (DD-MM-YYYY)      ")
-	log.Printf(" Acesse em: http://localhost:%s                  ", cfg.Port)
-	log.Printf(" Diretório de armazenamento: %s                  ", cfg.MetasDir)
+	log.Printf(" Diary - Aplicativo Desktop Nativo (Omarchy / Hyprland)")
+	log.Printf(" Armazenamento local: %s", cfg.MetasDir)
+	log.Printf("==================================================")
+}
+
+func logWebBanner(cfg *config.Config) {
+	log.Printf("==================================================")
+	log.Printf(" Servidor Web iniciado com sucesso (Modo Headless)")
+	log.Printf(" Acesse em: http://localhost:%s", cfg.Port)
+	log.Printf(" Diretório de armazenamento: %s", cfg.MetasDir)
 	log.Printf("==================================================")
 }
