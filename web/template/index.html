@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diary - Metas Diárias</title>
+  <meta name="description" content="Gerenciador minimalista de metas diárias local-first com persistência em Markdown puro.">
+  <style>
+    :root {
+      /* Paleta de Cores de Alto Contraste (Tema Claro) */
+      --accent: #d97706;
+      --accent-hover: #b45309;
+      --accent-soft: #fef3c7;
+      --accent-border: #fcd34d;
+      --accent-text: #ffffff;
+      --accent-ring: rgba(217, 119, 6, 0.3);
+
+      /* Superfícies Neutras Estruturadas */
+      --bg-page: #f8fafc;
+      --surface-card: #ffffff;
+      --surface-input: #f1f5f9;
+      --surface-hover: #f8fafc;
+      --border-line: #cbd5e1;
+      --border-subtle: #e2e8f0;
+
+      /* Tipografia de Alto Contraste (WCAG AAA) */
+      --text-heading: #0f172a;
+      --text-body: #1e293b;
+      --text-muted: #475569;
+      --text-faint: #64748b;
+      --placeholder-color: #64748b;
+
+      /* Estados Semânticos */
+      --success-soft: #dcfce7;
+      --success-border: #86efac;
+      --success-ink: #166534;
+      --danger-soft: #fee2e2;
+      --danger-border: #fca5a5;
+      --danger-ink: #991b1b;
+
+      /* Geometria e Sombras */
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --radius-pill: 9999px;
+
+      --shadow-card: 
+        0 1px 2px rgba(15, 23, 42, 0.04),
+        0 10px 24px -4px rgba(15, 23, 42, 0.06);
+      --shadow-subtle: 0 1px 2px rgba(15, 23, 42, 0.06);
+
+      --ease-tactile: cubic-bezier(0.16, 1, 0.3, 1);
+      --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    [data-theme="dark"] {
+      /* Paleta de Cores de Alto Contraste (Tema Escuro) */
+      --accent: #f59e0b;
+      --accent-hover: #fbbf24;
+      --accent-soft: rgba(245, 158, 11, 0.15);
+      --accent-border: rgba(245, 158, 11, 0.35);
+      --accent-text: #0f172a;
+      --accent-ring: rgba(245, 158, 11, 0.35);
+
+      --bg-page: #090d16;
+      --surface-card: #131b2e;
+      --surface-input: #0e1526;
+      --surface-hover: #1a243c;
+      --border-line: #27354f;
+      --border-subtle: #1d283d;
+
+      --text-heading: #f8fafc;
+      --text-body: #e2e8f0;
+      --text-muted: #94a3b8;
+      --text-faint: #64748b;
+      --placeholder-color: #64748b;
+
+      --success-soft: rgba(34, 197, 94, 0.15);
+      --success-border: rgba(34, 197, 94, 0.35);
+      --success-ink: #4ade80;
+
+      --danger-soft: rgba(239, 68, 68, 0.15);
+      --danger-border: rgba(239, 68, 68, 0.35);
+      --danger-ink: #f87171;
+
+      --shadow-card: 
+        0 1px 3px rgba(0, 0, 0, 0.3),
+        0 12px 28px -6px rgba(0, 0, 0, 0.45);
+      --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.35);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-page);
+      color: var(--text-body);
+      font-family: var(--font-stack);
+      display: flex;
+      justify-content: center;
+      min-height: 100dvh;
+      padding: 40px 16px 48px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .app-shell {
+      width: 100%;
+      max-width: 580px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    /* Acessibilidade para leitores de tela */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    /* Estilo padrão de foco acessível */
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    /* Topo: Marca e Ações */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 4px;
+    }
+
+    .brand-group h1 {
+      font-size: 1.6rem;
+      font-weight: 750;
+      color: var(--text-heading);
+      letter-spacing: -0.025em;
+      line-height: 1.2;
+    }
+
+    .brand-group p {
+      font-size: 0.88rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-top: 2px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .theme-toggle-btn {
+      background: var(--surface-card);
+      border: 1.5px solid var(--border-line);
+      color: var(--text-heading);
+      width: 36px;
+      height: 36px;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s var(--ease-tactile);
+      box-shadow: var(--shadow-subtle);
+    }
+
+    .theme-toggle-btn:hover {
+      background: var(--accent-soft);
+      border-color: var(--accent-border);
+      color: var(--accent-hover);
+      transform: scale(1.03);
+    }
+
+    .theme-toggle-btn:active {
+      transform: scale(0.96);
+    }
+
+    /* Status de Sincronização */
+    .live-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: var(--radius-pill);
+      background: var(--accent-soft);
+      border: 1.5px solid var(--accent-border);
+      color: var(--text-heading);
+      transition: all 0.2s var(--ease-tactile);
+      user-select: none;
+      box-shadow: var(--shadow-subtle);
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: var(--radius-pill);
+      background: var(--accent);
+      transition: background-color 0.2s;
+    }
+
+    .live-status.saving .status-dot {
+      animation: pulse-dot 0.9s infinite alternate ease-in-out;
+    }
+
+    .live-status.error {
+      background: var(--danger-soft);
+      border-color: var(--danger-border);
+      color: var(--danger-ink);
+    }
+
+    .live-status.error .status-dot {
+      background: var(--danger-ink);
+    }
+
+    @keyframes pulse-dot {
+      0% { opacity: 0.3; transform: scale(0.85); }
+      100% { opacity: 1; transform: scale(1.2); }
+    }
+
+    /* Cartão Principal */
+    .card-core {
+      background: var(--surface-card);
+      border: 1.5px solid var(--border-line);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-card);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+
+    /* Navegador de Data */
+    .date-navigator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nav-arrow-btn {
+      background: var(--surface-input);
+      border: 1.5px solid var(--border-line);
+      color: var(--text-heading);
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      font-weight: 700;
+      transition: all 0.15s var(--ease-tactile);
+      flex-shrink: 0;
+    }
+
+    .nav-arrow-btn:hover {
+      background: var(--accent-soft);
+      border-color: var(--accent-border);
+      color: var(--accent-hover);
+    }
+
+    .nav-arrow-btn:active {
+      transform: scale(0.96);
+    }
+
+    .date-input-wrapper {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .date-text-box {
+      width: 100%;
+      height: 40px;
+      padding: 0 36px 0 12px;
+      border: 1.5px solid var(--border-line);
+      border-radius: var(--radius-md);
+      background: var(--surface-input);
+      color: var(--text-heading);
+      font-size: 0.95rem;
+      font-weight: 650;
+      letter-spacing: 0.04em;
+      text-align: center;
+      outline: none;
+      font-variant-numeric: tabular-nums;
+      transition: all 0.15s var(--ease-tactile);
+    }
+
+    .date-text-box:focus {
+      background: var(--surface-card);
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-ring);
+    }
+
+    .cal-icon-btn {
+      position: absolute;
+      right: 6px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 6px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.15s;
+    }
+
+    .cal-icon-btn:hover {
+      color: var(--accent);
+    }
+
+    .today-action-btn {
+      height: 40px;
+      padding: 0 15px;
+      background: var(--accent-soft);
+      color: var(--text-heading);
+      border: 1.5px solid var(--accent-border);
+      border-radius: var(--radius-md);
+      font-size: 0.85rem;
+      font-weight: 650;
+      cursor: pointer;
+      transition: all 0.15s var(--ease-tactile);
+      flex-shrink: 0;
+    }
+
+    .today-action-btn:hover {
+      background: var(--accent);
+      color: var(--accent-text);
+      border-color: var(--accent);
+    }
+
+    .today-action-btn:active {
+      transform: scale(0.96);
+    }
+
+    /* Medidor de Progresso */
+    .progress-module {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .progress-badges-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .progress-percent-badge {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-heading);
+      background: var(--accent-soft);
+      padding: 2px 9px;
+      border-radius: var(--radius-pill);
+      border: 1.5px solid var(--accent-border);
+      font-variant-numeric: tabular-nums;
+      transition: all 0.2s var(--ease-tactile);
+    }
+
+    .completion-badge {
+      display: none;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--success-ink);
+      background: var(--success-soft);
+      padding: 2px 9px;
+      border-radius: var(--radius-pill);
+      border: 1.5px solid var(--success-border);
+    }
+
+    .completion-badge.visible {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      animation: badge-pop 0.25s var(--ease-tactile);
+    }
+
+    @keyframes badge-pop {
+      0% { transform: scale(0.85); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .progress-track-bg {
+      width: 100%;
+      height: 9px;
+      background: var(--surface-input);
+      border: 1.5px solid var(--border-line);
+      border-radius: var(--radius-pill);
+      overflow: hidden;
+    }
+
+    .progress-fluid-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--accent);
+      border-radius: var(--radius-pill);
+      transition: width 0.3s var(--ease-tactile), background-color 0.3s ease;
+    }
+
+    .progress-fluid-fill.complete {
+      background: var(--success-ink);
+    }
+
+    /* Formulário de Adição */
+    .input-row-form {
+      display: flex;
+      gap: 8px;
+    }
+
+    .text-goal-input {
+      flex: 1;
+      height: 44px;
+      padding: 0 14px;
+      border: 1.5px solid var(--border-line);
+      border-radius: var(--radius-md);
+      background: var(--surface-input);
+      color: var(--text-heading);
+      font-size: 0.95rem;
+      font-weight: 500;
+      outline: none;
+      transition: all 0.15s var(--ease-tactile);
+    }
+
+    .text-goal-input:focus {
+      background: var(--surface-card);
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-ring);
+    }
+
+    .text-goal-input::placeholder {
+      color: var(--placeholder-color);
+      opacity: 0.85;
+    }
+
+    .add-action-btn {
+      padding: 0 18px;
+      height: 44px;
+      background: var(--accent);
+      color: var(--accent-text);
+      border: 1.5px solid var(--accent);
+      border-radius: var(--radius-md);
+      font-size: 0.9rem;
+      font-weight: 650;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.15s var(--ease-tactile);
+      white-space: nowrap;
+      box-shadow: var(--shadow-subtle);
+    }
+
+    .add-action-btn:hover {
+      background: var(--accent-hover);
+      border-color: var(--accent-hover);
+    }
+
+    .add-action-btn:active {
+      transform: scale(0.97);
+    }
+
+    /* Lista de Itens */
+    .items-stack {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      min-height: 60px;
+    }
+
+    .item-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 13px;
+      border-radius: var(--radius-md);
+      background: var(--surface-card);
+      border: 1.5px solid var(--border-line);
+      transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s var(--ease-tactile);
+      animation: item-slide-in 0.2s var(--ease-tactile);
+    }
+
+    @keyframes item-slide-in {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .item-card:hover {
+      background: var(--surface-hover);
+      border-color: var(--accent);
+    }
+
+    /* Checkbox Acessível e Nítido */
+    .checkbox-control {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border-line);
+      border-radius: var(--radius-sm);
+      background: var(--surface-input);
+      cursor: pointer;
+      position: relative;
+      flex-shrink: 0;
+      transition: all 0.15s var(--ease-tactile);
+    }
+
+    .checkbox-control:hover {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .checkbox-control:checked {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .checkbox-control:checked::after {
+      content: "";
+      position: absolute;
+      left: 5px;
+      top: 2px;
+      width: 5px;
+      height: 9px;
+      border: solid var(--accent-text);
+      border-width: 0 2.2px 2.2px 0;
+      transform: rotate(45deg);
+    }
+
+    .item-text-label {
+      flex: 1;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text-body);
+      cursor: pointer;
+      user-select: none;
+      word-break: break-word;
+      transition: color 0.15s ease, text-decoration-color 0.15s ease;
+    }
+
+    .item-card.done .item-text-label {
+      text-decoration: line-through;
+      color: var(--text-faint);
+    }
+
+    /* Botão de Exclusão */
+    .remove-item-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 6px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.6;
+      transition: all 0.15s var(--ease-tactile);
+      flex-shrink: 0;
+    }
+
+    .item-card:hover .remove-item-btn {
+      opacity: 0.9;
+    }
+
+    .remove-item-btn:hover {
+      opacity: 1 !important;
+      color: var(--danger-ink);
+      background: var(--danger-soft);
+    }
+
+    /* Estado Vazio Humanizado */
+    .empty-display {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 36px 16px;
+      color: var(--text-muted);
+      text-align: center;
+      gap: 10px;
+    }
+
+    .empty-display svg {
+      width: 40px;
+      height: 40px;
+      stroke: var(--text-faint);
+      opacity: 0.8;
+    }
+
+    .empty-title {
+      font-size: 0.95rem;
+      font-weight: 650;
+      color: var(--text-heading);
+    }
+
+    .empty-hint {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      max-width: 300px;
+      line-height: 1.4;
+    }
+
+    /* Barra de Atalhos de Teclado */
+    .shortcuts-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      font-size: 0.78rem;
+      color: var(--text-faint);
+      padding: 2px 0;
+      flex-wrap: wrap;
+    }
+
+    .shortcut-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    kbd {
+      display: inline-block;
+      padding: 1px 5px;
+      font-family: inherit;
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: var(--text-heading);
+      background: var(--surface-card);
+      border: 1px solid var(--border-line);
+      border-radius: 4px;
+      box-shadow: 0 1px 1px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Rodapé Humanizado */
+    footer {
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-align: center;
+      padding: 4px 0 0;
+      line-height: 1.4;
+    }
+
+    footer a {
+      color: var(--text-muted);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    footer a:hover {
+      color: var(--accent);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Cabeçalho -->
+    <header class="top-bar">
+      <div class="brand-group">
+        <h1>Metas Diárias</h1>
+        <p id="formatted-date" aria-live="polite">Carregando data...</p>
+      </div>
+      <div class="top-actions">
+        <button type="button" id="theme-toggle-btn" class="theme-toggle-btn" title="Alternar tema claro ou escuro" aria-label="Alternar tema claro ou escuro">
+        </button>
+        <div id="sync-status" class="live-status" role="status" aria-live="polite">
+          <span class="status-dot"></span>
+          <span id="sync-text">Sincronizado</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Card Principal -->
+    <main class="card-core">
+      <!-- Seletor de Data -->
+      <section class="date-navigator" aria-label="Navegação de datas">
+        <button type="button" class="nav-arrow-btn" id="prev-day-btn" title="Dia anterior" aria-label="Dia anterior">‹</button>
+        <div class="date-input-wrapper">
+          <label for="date-display" class="sr-only">Data selecionada em formato dia, mês e ano</label>
+          <input 
+            type="text" 
+            id="date-display" 
+            class="date-text-box" 
+            placeholder="DD/MM/AAAA" 
+            maxlength="10" 
+            autocomplete="off"
+            title="Formato: DD/MM/AAAA"
+          >
+          <button type="button" class="cal-icon-btn" id="calendar-btn" title="Abrir calendário" aria-label="Abrir calendário">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+              <line x1="16" y1="2" x2="16" y2="6"></line>
+              <line x1="8" y1="2" x2="8" y2="6"></line>
+              <line x1="3" y1="10" x2="21" y2="10"></line>
+            </svg>
+          </button>
+          <input type="date" id="native-date-picker" tabindex="-1" aria-hidden="true" style="position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0;">
+        </div>
+        <button type="button" class="nav-arrow-btn" id="next-day-btn" title="Próximo dia" aria-label="Próximo dia">›</button>
+        <button type="button" class="today-action-btn" id="today-btn">Hoje</button>
+      </section>
+
+      <!-- Progresso com barra fluida e acessibilidade -->
+      <section class="progress-module" aria-label="Progresso das metas">
+        <div class="progress-meta">
+          <span id="progress-text">0 de 0 concluídas</span>
+          <div class="progress-badges-wrap">
+            <span id="completion-badge" class="completion-badge">Concluído!</span>
+            <span id="progress-percent" class="progress-percent-badge">0%</span>
+          </div>
+        </div>
+        <div 
+          class="progress-track-bg"
+          role="progressbar" 
+          id="progress-bar-el"
+          aria-valuenow="0" 
+          aria-valuemin="0" 
+          aria-valuemax="100" 
+          aria-label="Porcentagem de metas concluídas"
+        >
+          <div class="progress-fluid-fill" id="progress-fill"></div>
+        </div>
+      </section>
+
+      <!-- Formulário de Nova Meta -->
+      <form class="input-row-form" id="add-form" aria-label="Adicionar nova meta">
+        <label for="new-goal-input" class="sr-only">Texto da nova meta</label>
+        <input 
+          type="text" 
+          class="text-goal-input" 
+          id="new-goal-input" 
+          placeholder="O que você quer concluir hoje? (aperte / para focar)" 
+          autocomplete="off"
+          required
+        >
+        <button type="submit" class="add-action-btn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          Adicionar
+        </button>
+      </form>
+
+      <!-- Lista de Metas -->
+      <ul class="items-stack" id="goals-list" aria-label="Lista de metas do dia"></ul>
+    </main>
+
+    <!-- Atalhos de Teclado -->
+    <div class="shortcuts-bar" aria-label="Atalhos de teclado úteis">
+      <span class="shortcut-item"><kbd>/</kbd> Nova meta</span>
+      <span class="shortcut-item"><kbd>←</kbd> <kbd>→</kbd> Mudar dia</span>
+      <span class="shortcut-item"><kbd>T</kbd> Hoje</span>
+      <span class="shortcut-item"><kbd>Esc</kbd> Desfocar</span>
+    </div>
+
+    <!-- Rodapé -->
+    <footer>
+      Notas salvas localmente em Markdown na pasta <code>./metas</code>. Seus dados permanecem com você.
+    </footer>
+  </div>
+
+  <script>
+    // Gerenciamento de tema (Claro / Escuro com persistência em localStorage)
+    const themeToggleBtn = document.getElementById('theme-toggle-btn');
+    const sunIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>';
+    const moonIcon = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>';
+
+    function applyTheme(theme) {
+      if (theme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        themeToggleBtn.innerHTML = sunIcon;
+        themeToggleBtn.title = 'Mudar para tema claro';
+      } else {
+        document.documentElement.removeAttribute('data-theme');
+        themeToggleBtn.innerHTML = moonIcon;
+        themeToggleBtn.title = 'Mudar para tema escuro';
+      }
+      try {
+        localStorage.setItem('diary-theme', theme);
+      } catch (e) {}
+    }
+
+    let initialTheme = 'light';
+    try {
+      initialTheme = localStorage.getItem('diary-theme') || 
+        (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    } catch (e) {}
+    applyTheme(initialTheme);
+
+    themeToggleBtn.addEventListener('click', function() {
+      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+      applyTheme(isDark ? 'light' : 'dark');
+    });
+
+    // Estado da aplicação (formato canônico DD-MM-YYYY)
+    let currentDate = '';
+    let currentItems = [];
+    let isSaving = false;
+    let pendingSave = false;
+
+    // Elementos DOM
+    const dateDisplay = document.getElementById('date-display');
+    const calendarBtn = document.getElementById('calendar-btn');
+    const nativeDatePicker = document.getElementById('native-date-picker');
+    const prevDayBtn = document.getElementById('prev-day-btn');
+    const nextDayBtn = document.getElementById('next-day-btn');
+    const todayBtn = document.getElementById('today-btn');
+    const formattedDateEl = document.getElementById('formatted-date');
+    const syncStatusEl = document.getElementById('sync-status');
+    const syncTextEl = document.getElementById('sync-text');
+    const addForm = document.getElementById('add-form');
+    const newGoalInput = document.getElementById('new-goal-input');
+    const goalsList = document.getElementById('goals-list');
+    const progressText = document.getElementById('progress-text');
+    const progressPercent = document.getElementById('progress-percent');
+    const progressFill = document.getElementById('progress-fill');
+    const progressBarEl = document.getElementById('progress-bar-el');
+    const completionBadge = document.getElementById('completion-badge');
+
+    // Converte DD-MM-YYYY para DD/MM/AAAA
+    function dmyToSlash(dmy) {
+      if (!dmy) return '';
+      return dmy.replace(/-/g, '/');
+    }
+
+    // Converte DD-MM-YYYY para YYYY-MM-DD
+    function dmyToIso(dmy) {
+      if (!dmy) return '';
+      const parts = dmy.split('-');
+      return parts[2] + '-' + parts[1] + '-' + parts[0];
+    }
+
+    // Retorna data no formato canônico DD-MM-YYYY
+    function getLocalDateDMY(d) {
+      const date = d || new Date();
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = date.getFullYear();
+      return day + '-' + month + '-' + year;
+    }
+
+    // Atualiza cabeçalho legível (exemplo: "Sábado • 26/09/2026")
+    function updateDateLabel(dmyStr) {
+      if (!dmyStr) return;
+      const parts = dmyStr.split('-').map(Number);
+      const dateObj = new Date(parts[2], parts[1] - 1, parts[0]);
+      const weekday = dateObj.toLocaleDateString('pt-BR', { weekday: 'long' });
+      const capitalized = weekday.charAt(0).toUpperCase() + weekday.slice(1);
+      const dayFormatted = String(parts[0]).padStart(2, '0') + '/' + String(parts[1]).padStart(2, '0') + '/' + parts[2];
+      formattedDateEl.textContent = capitalized + ' • ' + dayFormatted;
+    }
+
+    // Aplica data selecionada e sincroniza dados
+    function setDate(dmyStr) {
+      currentDate = dmyStr;
+      dateDisplay.value = dmyToSlash(dmyStr);
+      nativeDatePicker.value = dmyToIso(dmyStr);
+      updateDateLabel(currentDate);
+      loadMetas(currentDate);
+    }
+
+    // Navegação de dias
+    function shiftDate(deltaDays) {
+      if (!currentDate) return;
+      const parts = currentDate.split('-').map(Number);
+      const date = new Date(parts[2], parts[1] - 1, parts[0]);
+      date.setDate(date.getDate() + deltaDays);
+      setDate(getLocalDateDMY(date));
+    }
+
+    // Atualiza indicador visual de sincronização
+    function setSyncStatus(state, message) {
+      syncStatusEl.className = 'live-status';
+      if (state === 'saving') {
+        syncStatusEl.classList.add('saving');
+        syncTextEl.textContent = message || 'Salvando...';
+      } else if (state === 'error') {
+        syncStatusEl.classList.add('error');
+        syncTextEl.textContent = message || 'Erro ao salvar';
+      } else {
+        syncTextEl.textContent = message || 'Sincronizado';
+      }
+    }
+
+    // Atualiza barra e percentual de progresso
+    function updateProgress() {
+      const total = currentItems.length;
+      if (total === 0) {
+        progressText.textContent = 'Nenhuma meta definida';
+        progressPercent.textContent = '0%';
+        progressFill.style.width = '0%';
+        progressFill.classList.remove('complete');
+        progressBarEl.setAttribute('aria-valuenow', '0');
+        completionBadge.classList.remove('visible');
+        return;
+      }
+
+      const done = currentItems.filter(function(i) { return i.done; }).length;
+      const pct = Math.round((done / total) * 100);
+      progressText.textContent = done + ' de ' + total + ' concluída' + (total > 1 ? 's' : '');
+      progressPercent.textContent = pct + '%';
+      progressFill.style.width = pct + '%';
+      progressBarEl.setAttribute('aria-valuenow', String(pct));
+
+      if (done === total && total > 0) {
+        progressFill.classList.add('complete');
+        completionBadge.classList.add('visible');
+      } else {
+        progressFill.classList.remove('complete');
+        completionBadge.classList.remove('visible');
+      }
+    }
+
+    // Renderiza itens da lista de metas
+    function renderList() {
+      goalsList.innerHTML = '';
+      updateProgress();
+
+      if (currentItems.length === 0) {
+        goalsList.innerHTML = '<li class="empty-display">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+            '<rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>' +
+            '<line x1="9" y1="9" x2="15" y2="9"></line>' +
+            '<line x1="9" y1="13" x2="15" y2="13"></line>' +
+            '<line x1="9" y1="17" x2="12" y2="17"></line>' +
+          '</svg>' +
+          '<div class="empty-title">Nenhuma meta por enquanto</div>' +
+          '<div class="empty-hint">Adicione seu primeiro item para planejar o que deseja concluir hoje.</div>' +
+        '</li>';
+        return;
+      }
+
+      currentItems.forEach(function(item, index) {
+        const li = document.createElement('li');
+        li.className = 'item-card' + (item.done ? ' done' : '');
+
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.className = 'checkbox-control';
+        checkbox.checked = item.done;
+        checkbox.id = 'goal-item-' + index;
+        checkbox.setAttribute('aria-label', (item.done ? 'Marcar como não concluída: ' : 'Marcar como concluída: ') + item.text);
+        checkbox.addEventListener('change', function() { toggleItem(index); });
+
+        const label = document.createElement('label');
+        label.className = 'item-text-label';
+        label.htmlFor = 'goal-item-' + index;
+        label.textContent = item.text;
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.type = 'button';
+        deleteBtn.className = 'remove-item-btn';
+        deleteBtn.title = 'Remover meta';
+        deleteBtn.setAttribute('aria-label', 'Remover meta: ' + item.text);
+        deleteBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+          '<line x1="18" y1="6" x2="6" y2="18"></line>' +
+          '<line x1="6" y1="6" x2="18" y2="18"></line>' +
+        '</svg>';
+        deleteBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          deleteItem(index);
+        });
+
+        li.appendChild(checkbox);
+        li.appendChild(label);
+        li.appendChild(deleteBtn);
+        goalsList.appendChild(li);
+      });
+    }
+
+    // Carrega metas via GET /api/metas?date=DD-MM-YYYY
+    async function loadMetas(date) {
+      setSyncStatus('saving', 'Carregando...');
+      try {
+        const res = await fetch('/api/metas?date=' + encodeURIComponent(date));
+        if (!res.ok) throw new Error('Falha na resposta do servidor');
+        const data = await res.json();
+        
+        if (data.date === currentDate) {
+          currentItems = data.items || [];
+          renderList();
+          setSyncStatus('ok', 'Sincronizado');
+        }
+      } catch (err) {
+        console.error(err);
+        setSyncStatus('error', 'Erro ao carregar');
+      }
+    }
+
+    // Salva metas via POST /api/metas
+    async function syncMetas() {
+      if (isSaving) {
+        pendingSave = true;
+        return;
+      }
+      isSaving = true;
+      setSyncStatus('saving', 'Salvando...');
+
+      const targetDate = currentDate;
+      const targetItems = currentItems.map(function(item) {
+        return { text: item.text, done: item.done };
+      });
+
+      try {
+        const res = await fetch('/api/metas', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            date: targetDate,
+            items: targetItems
+          })
+        });
+
+        if (!res.ok) throw new Error('Falha ao salvar metas');
+        setSyncStatus('ok', 'Sincronizado');
+      } catch (err) {
+        console.error(err);
+        setSyncStatus('error', 'Erro ao salvar');
+      } finally {
+        isSaving = false;
+        if (pendingSave) {
+          pendingSave = false;
+          syncMetas();
+        }
+      }
+    }
+
+    // Alterna estado da meta
+    function toggleItem(index) {
+      if (!currentItems[index]) return;
+      currentItems[index].done = !currentItems[index].done;
+      renderList();
+      syncMetas();
+    }
+
+    // Remove uma meta
+    function deleteItem(index) {
+      currentItems.splice(index, 1);
+      renderList();
+      syncMetas();
+    }
+
+    // Adiciona uma nova meta
+    function addItem(text) {
+      const trimmed = text.trim();
+      if (!trimmed) return;
+      currentItems.push({ text: trimmed, done: false });
+      newGoalInput.value = '';
+      renderList();
+      syncMetas();
+    }
+
+    // Valida e aplica data digitada no campo DD/MM/AAAA
+    function validateAndApplyInput() {
+      const val = dateDisplay.value.trim();
+      const clean = val.replace(/\//g, '-');
+      const parts = clean.split('-').map(Number);
+      if (parts.length === 3) {
+        const day = parts[0];
+        const month = parts[1];
+        const year = parts[2];
+        if (day >= 1 && day <= 31 && month >= 1 && month <= 12 && year >= 1900 && year <= 2100) {
+          const dmy = String(day).padStart(2, '0') + '-' + String(month).padStart(2, '0') + '-' + year;
+          if (dmy !== currentDate) {
+            setDate(dmy);
+          }
+          return;
+        }
+      }
+      dateDisplay.value = dmyToSlash(currentDate);
+    }
+
+    // Eventos de formulário e inputs
+    addForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      addItem(newGoalInput.value);
+    });
+
+    dateDisplay.addEventListener('input', function() {
+      let v = this.value.replace(/\D/g, '');
+      if (v.length > 8) v = v.substring(0, 8);
+      if (v.length >= 5) {
+        this.value = v.substring(0, 2) + '/' + v.substring(2, 4) + '/' + v.substring(4);
+      } else if (v.length >= 3) {
+        this.value = v.substring(0, 2) + '/' + v.substring(2);
+      } else {
+        this.value = v;
+      }
+      if (v.length === 8) {
+        validateAndApplyInput();
+      }
+    });
+
+    dateDisplay.addEventListener('blur', validateAndApplyInput);
+    dateDisplay.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        validateAndApplyInput();
+        this.blur();
+      }
+    });
+
+    calendarBtn.addEventListener('click', function() {
+      if (typeof nativeDatePicker.showPicker === 'function') {
+        nativeDatePicker.showPicker();
+      } else {
+        nativeDatePicker.focus();
+        nativeDatePicker.click();
+      }
+    });
+
+    nativeDatePicker.addEventListener('change', function() {
+      if (!this.value) return;
+      const parts = this.value.split('-');
+      const dmy = parts[2] + '-' + parts[1] + '-' + parts[0];
+      setDate(dmy);
+    });
+
+    prevDayBtn.addEventListener('click', function() { shiftDate(-1); });
+    nextDayBtn.addEventListener('click', function() { shiftDate(1); });
+    todayBtn.addEventListener('click', function() {
+      const todayDmy = getLocalDateDMY();
+      if (currentDate !== todayDmy) {
+        setDate(todayDmy);
+      }
+    });
+
+    // Atalhos globais de teclado
+    document.addEventListener('keydown', function(e) {
+      const isInputFocused = document.activeElement === newGoalInput || document.activeElement === dateDisplay;
+
+      if (!isInputFocused) {
+        if (e.key === '/') {
+          e.preventDefault();
+          newGoalInput.focus();
+          newGoalInput.select();
+        } else if (e.key === 't' || e.key === 'T') {
+          e.preventDefault();
+          const todayDmy = getLocalDateDMY();
+          if (currentDate !== todayDmy) {
+            setDate(todayDmy);
+          }
+        } else if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          shiftDate(-1);
+        } else if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          shiftDate(1);
+        }
+      } else {
+        if (e.key === 'Escape') {
+          document.activeElement.blur();
+        }
+      }
+    });
+
+    // Inicialização
+    (function init() {
+      const initialDmy = getLocalDateDMY();
+      setDate(initialDmy);
+    })();
+  </script>
+</body>
+</html>
