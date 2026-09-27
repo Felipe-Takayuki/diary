@@ -6,21 +6,27 @@ import (
 	"log"
 	"net/http"
 
+	"diary/internal/adapter/theme"
 	"diary/internal/domain"
 	"diary/internal/usecase"
 )
 
 // Handler serves HTTP requests for the daily goals monolith.
 type Handler struct {
-	useCase    usecase.DailyGoalUseCase
-	webContent []byte
+	useCase      usecase.DailyGoalUseCase
+	webContent   []byte
+	themeService theme.Service
 }
 
-// NewHandler creates a new Handler with injected use case and web assets.
-func NewHandler(useCase usecase.DailyGoalUseCase, webContent []byte) *Handler {
+// NewHandler creates a new Handler with injected use case, web assets, and optional theme service.
+func NewHandler(useCase usecase.DailyGoalUseCase, webContent []byte, themeService theme.Service) *Handler {
+	if themeService == nil {
+		themeService = theme.NewOmarchyService("")
+	}
 	return &Handler{
-		useCase:    useCase,
-		webContent: webContent,
+		useCase:      useCase,
+		webContent:   webContent,
+		themeService: themeService,
 	}
 }
 
@@ -28,6 +34,7 @@ func NewHandler(useCase usecase.DailyGoalUseCase, webContent []byte) *Handler {
 func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("/", h.ServeUI)
 	mux.HandleFunc("/api/metas", h.HandleMetas)
+	mux.HandleFunc("/api/theme", h.HandleTheme)
 }
 
 // ServeUI handles GET / serving the single-page application.
@@ -56,6 +63,15 @@ func (h *Handler) HandleMetas(w http.ResponseWriter, r *http.Request) {
 	default:
 		http.Error(w, "Método não permitido", http.StatusMethodNotAllowed)
 	}
+}
+
+// HandleTheme handles GET /api/theme returning active theme colors.
+func (h *Handler) HandleTheme(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Método não permitido", http.StatusMethodNotAllowed)
+		return
+	}
+	h.writeJSON(w, http.StatusOK, h.themeService.GetCurrentTheme())
 }
 
 func (h *Handler) getMetas(w http.ResponseWriter, r *http.Request) {

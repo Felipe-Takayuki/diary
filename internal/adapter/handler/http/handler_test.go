@@ -36,7 +36,7 @@ func (m *mockGoalUseCase) SaveDailyGoals(ctx context.Context, rawDate string, it
 
 func TestHandler_ServeUI(t *testing.T) {
 	htmlContent := []byte("<html><body>Mock App</body></html>")
-	h := deliveryhttp.NewHandler(&mockGoalUseCase{}, htmlContent)
+	h := deliveryhttp.NewHandler(&mockGoalUseCase{}, htmlContent, nil)
 
 	mux := http.NewServeMux()
 	h.RegisterRoutes(mux)
@@ -95,7 +95,7 @@ func TestHandler_GetMetas(t *testing.T) {
 		},
 	}
 
-	h := deliveryhttp.NewHandler(mockUC, []byte(""))
+	h := deliveryhttp.NewHandler(mockUC, []byte(""), nil)
 	mux := http.NewServeMux()
 	h.RegisterRoutes(mux)
 
@@ -148,7 +148,7 @@ func TestHandler_SaveMetas(t *testing.T) {
 		},
 	}
 
-	h := deliveryhttp.NewHandler(mockUC, []byte(""))
+	h := deliveryhttp.NewHandler(mockUC, []byte(""), nil)
 	mux := http.NewServeMux()
 	h.RegisterRoutes(mux)
 
@@ -185,6 +185,43 @@ func TestHandler_SaveMetas(t *testing.T) {
 
 	t.Run("DELETE /api/metas returns 405", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodDelete, "/api/metas", nil)
+		rec := httptest.NewRecorder()
+
+		mux.ServeHTTP(rec, req)
+
+		if rec.Code != http.StatusMethodNotAllowed {
+			t.Errorf("got status %d, want %d", rec.Code, http.StatusMethodNotAllowed)
+		}
+	})
+}
+
+func TestHandler_GetTheme(t *testing.T) {
+	h := deliveryhttp.NewHandler(&mockGoalUseCase{}, []byte(""), nil)
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux)
+
+	t.Run("GET /api/theme returns 200 with theme payload", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodGet, "/api/theme", nil)
+		rec := httptest.NewRecorder()
+
+		mux.ServeHTTP(rec, req)
+
+		if rec.Code != http.StatusOK {
+			t.Fatalf("got status %d, want %d", rec.Code, http.StatusOK)
+		}
+
+		var data map[string]any
+		if err := json.NewDecoder(rec.Body).Decode(&data); err != nil {
+			t.Fatalf("failed to decode json: %v", err)
+		}
+
+		if _, ok := data["colors"]; !ok {
+			t.Errorf("expected colors field in response, got %+v", data)
+		}
+	})
+
+	t.Run("POST /api/theme returns 405", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodPost, "/api/theme", nil)
 		rec := httptest.NewRecorder()
 
 		mux.ServeHTTP(rec, req)

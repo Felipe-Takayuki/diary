@@ -7,6 +7,7 @@ import (
 
 	deliveryhttp "diary/internal/adapter/handler/http"
 	"diary/internal/adapter/repository/markdown"
+	"diary/internal/adapter/theme"
 	"diary/internal/config"
 	"diary/internal/usecase"
 	"diary/web"
@@ -25,10 +26,13 @@ func Run() error {
 	// 2. Use Case (Application Layer)
 	dailyGoalUseCase := usecase.NewDailyGoalUseCase(repo)
 
-	// 3. Primary Adapter (HTTP Handler)
-	handler := deliveryhttp.NewHandler(dailyGoalUseCase, web.IndexHTML)
+	// 3. Theme Service Adapter
+	themeService := theme.NewOmarchyService("")
 
-	// 4. Router setup
+	// 4. Primary Adapter (HTTP Handler)
+	handler := deliveryhttp.NewHandler(dailyGoalUseCase, web.IndexHTML, themeService)
+
+	// 5. Router setup
 	mux := http.NewServeMux()
 	handler.RegisterRoutes(mux)
 

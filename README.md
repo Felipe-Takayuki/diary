@@ -11,7 +11,8 @@ O projeto foi construído sobre Clean Architecture e roda com zero dependências
 - **Persistência local em Markdown:** Cada dia gera um arquivo individual com checklists (`- [ ] ` e `- [x] `) compatíveis com qualquer editor de texto.
 - **Zero dependências externas:** Backend puramente em Go nativo e frontend embutido no binário com `go:embed`.
 - **Clean Architecture:** Camadas separadas de domínio, casos de uso, adaptadores HTTP e repositório de persistência.
-- **Interface nítida e acessível:** Alto contraste (WCAG AAA), alternador de tema claro e escuro, barra de progresso em tempo real e estados visuais imediatos.
+- **Adaptação automática ao Omarchy:** Detecta e sincroniza dinamicamente as cores e o modo (claro/escuro) do tema ativo no Omarchy, com fallback elegante (Everforest) para outros sistemas.
+- **Interface nítida e acessível:** Alto contraste (WCAG AAA), barra de progresso em tempo real, estados visuais táteis e zero tons estridentes.
 - **Navegação rápida por teclado:** Atalhos para focar no campo de texto, alternar entre datas e retornar para o dia atual.
 - **Operações seguras e concorrentes:** Acesso ao disco protegido por `sync.RWMutex` com tratamento contra path traversal.
 
@@ -145,6 +146,25 @@ Grava as metas da data no arquivo Markdown correspondente.
       "done": true
     }
   ]
+}
+```
+
+### `GET /api/theme`
+Retorna as definições e cores do tema atualmente ativo (Omarchy ou fallback).
+
+**Resposta de exemplo (`200 OK`):**
+```json
+{
+  "source": "omarchy",
+  "themeName": "Everforest",
+  "mode": "dark",
+  "colors": {
+    "accent": "#7fbbb3",
+    "background": "#2d353b",
+    "foreground": "#d3c6aa",
+    "green": "#a7c080",
+    "red": "#e67e80"
+  }
 }
 ```
 
