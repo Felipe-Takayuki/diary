@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 540 120" width="540" height="120" fill="none">
+  <defs>
+    <style>
+      .logo-bg { fill: #21272c; }
+      .badge-bg { fill: #2d353b; stroke: #475258; stroke-width: 1.5; }
+      .accent-d { fill: #7fbbb3; }
+      .check-mark { stroke: #a7c080; stroke-width: 6; stroke-linecap: square; stroke-linejoin: miter; fill: none; }
+      .spine { stroke: #374247; stroke-width: 2.5; stroke-linecap: round; }
+      .task-box { fill: #181d20; stroke: #7fbbb3; stroke-width: 1.5; rx: 1.5px; }
+      .task-line { fill: #d3c6aa; opacity: 0.85; }
+      
+      .title-text { font-family: 'JetBrainsMono Nerd Font', 'JetBrains Mono', 'Segoe UI', monospace; font-size: 38px; font-weight: 800; fill: #d3c6aa; letter-spacing: -0.5px; }
+      .tagline-text { font-family: 'JetBrainsMono Nerd Font', 'JetBrains Mono', 'Segoe UI', monospace; font-size: 13.5px; font-weight: 500; fill: #9da9a0; }
+      .chip-text { font-family: 'JetBrainsMono Nerd Font', 'JetBrains Mono', 'Segoe UI', monospace; font-size: 11px; font-weight: 600; fill: #7fbbb3; }
+    </style>
+  </defs>
+
+  <!-- Fundo transparente ou base escura suave -->
+  <rect width="540" height="120" rx="8" fill="#21272c"/>
+
+  <!-- Ícone / Emblema Omarchy (Escala 1.4x de 64x64, ancorado em x=20, y=16, 88x88) -->
+  <g transform="translate(18, 16)">
+    <!-- Container do Emblema -->
+    <rect class="badge-bg" x="0" y="0" width="88" height="88" rx="8" />
+
+    <!-- Divisor Central / Lombada do Diário -->
+    <line class="spine" x1="44" y1="12" x2="44" y2="76" />
+
+    <!-- Letra D Modular com Chanfro Arquitetural -->
+    <!-- Proporção reescalada: M16 20 H32 L40 28 V60 L32 68 H16 Z M24 28 V60 H30 L34 56 V32 L30 28 Z -->
+    <path class="accent-d" d="M16 20 H31 L39 28 V60 L31 68 H16 Z M24 28 V60 H29 L33 56 V32 L29 28 Z" />
+
+    <!-- Lado Direito: Linhas de Metas -->
+    <rect class="task-box" x="50" y="22" width="6" height="6" rx="1.5" />
+    <rect class="task-line" x="60" y="23.5" width="16" height="3.5" rx="1" />
+
+    <rect class="task-box" x="50" y="32.5" width="6" height="6" rx="1.5" />
+    <rect class="task-line" x="60" y="34" width="11" height="3.5" rx="1" />
+
+    <!-- Checkmark Omarchy -->
+    <path class="check-mark" d="M50 54 L59 63 L74 46" />
+  </g>
+
+  <!-- Tipografia e Naming -->
+  <g transform="translate(128, 22)">
+    <!-- Título Principal -->
+    <text class="title-text" x="0" y="36">DIARY</text>
+    <!-- Ponto de Acento Omarchy -->
+    <rect x="114" y="27" width="8" height="8" rx="2" fill="#7fbbb3" />
+
+    <!-- Subtítulo -->
+    <text class="tagline-text" x="0" y="58">Minimalist Local-First Daily Goals for Omarchy</text>
+
+    <!-- Badges / Micro-tags -->
+    <g transform="translate(0, 68)">
+      <rect x="0" y="0" width="70" height="20" rx="3" fill="#2d353b" stroke="#475258" stroke-width="1.2"/>
+      <text class="chip-text" x="35" y="14" text-anchor="middle">GO NATIVE</text>
+
+      <rect x="78" y="0" width="76" height="20" rx="3" fill="#2d353b" stroke="#475258" stroke-width="1.2"/>
+      <text class="chip-text" x="116" y="14" text-anchor="middle">MARKDOWN</text>
+
+      <rect x="162" y="0" width="102" height="20" rx="3" fill="#2d353b" stroke="#475258" stroke-width="1.2"/>
+      <text class="chip-text" x="213" y="14" text-anchor="middle">OMARCHY THEME</text>
+    </g>
+  </g>
+</svg>

@@ -1,6 +1,21 @@
-# Diary
+<p align="center">
+  <img src="assets/logo.svg" alt="Diary Logo" width="540">
+</p>
 
-Gerenciador minimalista de metas diárias em Go. Seus dados ficam salvos no seu computador como arquivos Markdown (`./metas/DD-MM-YYYY.md`), sem bancos de dados externos e sem serviços na nuvem.
+<p align="center">
+  <strong>Gerenciador minimalista de metas diárias local-first em Go com estética e integração nativa ao Omarchy.</strong>
+</p>
+
+<p align="center">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-7fbbb3.svg" alt="License: MIT"></a>
+  <a href="https://golang.org"><img src="https://img.shields.io/badge/Go-1.22+-83c092.svg" alt="Go 1.22+"></a>
+  <a href="https://github.com/takayuki/diary/actions"><img src="https://img.shields.io/badge/CI-Passing-a7c080.svg" alt="CI Status"></a>
+  <img src="https://img.shields.io/badge/Dependencies-Zero-d3c6aa.svg" alt="Zero Dependencies">
+</p>
+
+---
+
+Seus dados ficam salvos no seu computador como arquivos Markdown (`./metas/DD-MM-YYYY.md`), sem bancos de dados externos e sem serviços na nuvem.
 
 O projeto foi construído sobre Clean Architecture e roda com zero dependências externas: tanto o servidor quanto a interface gráfica funcionam exclusivamente com recursos nativos.
 
@@ -11,9 +26,9 @@ O projeto foi construído sobre Clean Architecture e roda com zero dependências
 - **Persistência local em Markdown:** Cada dia gera um arquivo individual com checklists (`- [ ] ` e `- [x] `) compatíveis com qualquer editor de texto.
 - **Zero dependências externas:** Backend puramente em Go nativo e frontend embutido no binário com `go:embed`.
 - **Clean Architecture:** Camadas separadas de domínio, casos de uso, adaptadores HTTP e repositório de persistência.
-- **Adaptação automática ao Omarchy:** Detecta e sincroniza dinamicamente as cores e o modo (claro/escuro) do tema ativo no Omarchy, com fallback elegante (Everforest) para outros sistemas.
-- **Interface nítida e acessível:** Alto contraste (WCAG AAA), barra de progresso em tempo real, estados visuais táteis e zero tons estridentes.
-- **Navegação rápida por teclado:** Atalhos para focar no campo de texto, alternar entre datas e retornar para o dia atual.
+- **Identidade Visual e Integração ao Omarchy:** Logotipo e interface criados sob as diretrizes geométricas e tokens do Omarchy, com detecção e sincronização dinâmica do tema ativo via `/api/theme`.
+- **Interface nítida e acessível:** Tipografia JetBrains Mono, cantos nítidos, alto contraste (WCAG AAA), barra de progresso em tempo real e atalhos rápidos de teclado.
+- **Navegação rápida por teclado:** Atalhos para focar no campo de texto (`/`), alternar entre datas (`←` / `→`) e retornar para hoje (`T`).
 - **Operações seguras e concorrentes:** Acesso ao disco protegido por `sync.RWMutex` com tratamento contra path traversal.
 
 ---
@@ -22,6 +37,10 @@ O projeto foi construído sobre Clean Architecture e roda com zero dependências
 
 ```
 diary/
+├── assets/                            # Identidade visual (logo horizontal e ícone SVG/PNG)
+│   ├── logo.svg
+│   ├── icon.svg
+│   └── favicon.svg
 ├── cmd/
 │   └── diary/
 │       └── main.go                    # Ponto de entrada padrão
@@ -37,12 +56,14 @@ diary/
 │   ├── usecase/                       # Casos de uso da aplicação
 │   │   └── daily_goal.go              # DailyGoalUseCase (GetDailyGoals, SaveDailyGoals)
 │   ├── adapter/                       # Adaptadores de entrada e saída
-│   │   ├── handler/http/              # Handlers HTTP, DTOs e rotas
-│   │   └── repository/markdown/       # Leitura e escrita concorrente de arquivos .md
+│   │   ├── handler/http/              # Handlers HTTP, rotas de metas, tema e favicons
+│   │   ├── repository/markdown/       # Leitura e escrita concorrente de arquivos .md
+│   │   └── theme/                     # Integração com Omarchy colors.toml
 │   └── config/
 │       └── config.go                  # Variáveis de ambiente (PORT, METAS_DIR)
 ├── web/
 │   ├── embed.go                       # Arquivos estáticos embutidos via go:embed
+│   ├── static/                        # Favicon SVG e ICO
 │   └── template/
 │       └── index.html                 # Interface web (HTML, CSS e JavaScript nativo)
 ├── metas/                             # Diretório onde os arquivos diários são salvos

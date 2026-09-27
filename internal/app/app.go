@@ -31,6 +31,7 @@ func Run() error {
 
 	// 4. Primary Adapter (HTTP Handler)
 	handler := deliveryhttp.NewHandler(dailyGoalUseCase, web.IndexHTML, themeService)
+	handler.SetFavicon(web.FaviconSVG, web.FaviconICO)
 
 	// 5. Router setup
 	mux := http.NewServeMux()

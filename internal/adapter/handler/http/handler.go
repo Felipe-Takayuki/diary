@@ -15,6 +15,8 @@ import (
 type Handler struct {
 	useCase      usecase.DailyGoalUseCase
 	webContent   []byte
+	faviconSVG   []byte
+	faviconICO   []byte
 	themeService theme.Service
 }
 
@@ -30,11 +32,51 @@ func NewHandler(useCase usecase.DailyGoalUseCase, webContent []byte, themeServic
 	}
 }
 
+// SetFavicon configures embedded favicon data for SVG and ICO formats.
+func (h *Handler) SetFavicon(svg, ico []byte) {
+	h.faviconSVG = svg
+	h.faviconICO = ico
+}
+
 // RegisterRoutes registers the application routes on the given ServeMux.
 func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("/", h.ServeUI)
+	mux.HandleFunc("/favicon.svg", h.ServeFaviconSVG)
+	mux.HandleFunc("/favicon.ico", h.ServeFaviconICO)
 	mux.HandleFunc("/api/metas", h.HandleMetas)
 	mux.HandleFunc("/api/theme", h.HandleTheme)
+}
+
+// ServeFaviconSVG serves the vector favicon.
+func (h *Handler) ServeFaviconSVG(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Método não permitido", http.StatusMethodNotAllowed)
+		return
+	}
+	if len(h.faviconSVG) == 0 {
+		http.NotFound(w, r)
+		return
+	}
+	w.Header().Set("Content-Type", "image/svg+xml")
+	w.Header().Set("Cache-Control", "public, max-age=86400")
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write(h.faviconSVG)
+}
+
+// ServeFaviconICO serves the ICO favicon.
+func (h *Handler) ServeFaviconICO(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Método não permitido", http.StatusMethodNotAllowed)
+		return
+	}
+	if len(h.faviconICO) == 0 {
+		http.NotFound(w, r)
+		return
+	}
+	w.Header().Set("Content-Type", "image/x-icon")
+	w.Header().Set("Cache-Control", "public, max-age=86400")
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write(h.faviconICO)
 }
 
 // ServeUI handles GET / serving the single-page application.

@@ -231,3 +231,49 @@ func TestHandler_GetTheme(t *testing.T) {
 		}
 	})
 }
+
+func TestHandler_Favicons(t *testing.T) {
+	h := deliveryhttp.NewHandler(&mockGoalUseCase{}, []byte(""), nil)
+	h.SetFavicon([]byte("<svg></svg>"), []byte("fake-ico"))
+	mux := http.NewServeMux()
+	h.RegisterRoutes(mux)
+
+	t.Run("GET /favicon.svg returns 200 with SVG", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodGet, "/favicon.svg", nil)
+		rec := httptest.NewRecorder()
+
+		mux.ServeHTTP(rec, req)
+
+		if rec.Code != http.StatusOK {
+			t.Fatalf("got status %d, want %d", rec.Code, http.StatusOK)
+		}
+		if !strings.Contains(rec.Header().Get("Content-Type"), "image/svg+xml") {
+			t.Errorf("expected image/svg+xml, got %s", rec.Header().Get("Content-Type"))
+		}
+	})
+
+	t.Run("GET /favicon.ico returns 200 with ICO", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodGet, "/favicon.ico", nil)
+		rec := httptest.NewRecorder()
+
+		mux.ServeHTTP(rec, req)
+
+		if rec.Code != http.StatusOK {
+			t.Fatalf("got status %d, want %d", rec.Code, http.StatusOK)
+		}
+		if !strings.Contains(rec.Header().Get("Content-Type"), "image/x-icon") {
+			t.Errorf("expected image/x-icon, got %s", rec.Header().Get("Content-Type"))
+		}
+	})
+
+	t.Run("POST /favicon.svg returns 405", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodPost, "/favicon.svg", nil)
+		rec := httptest.NewRecorder()
+
+		mux.ServeHTTP(rec, req)
+
+		if rec.Code != http.StatusMethodNotAllowed {
+			t.Errorf("got status %d, want %d", rec.Code, http.StatusMethodNotAllowed)
+		}
+	})
+}
