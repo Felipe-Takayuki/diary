@@ -127,11 +127,11 @@
       outline-offset: 2px;
     }
 
-    /* Topo: Marca e Ações */
+    /* Topo: Marca */
     .top-bar {
       display: flex;
-      align-items: center;
-      justify-content: space-between;
+      flex-direction: column;
+      gap: 2px;
       padding: 0 4px;
     }
 
@@ -149,106 +149,6 @@
       color: var(--text-muted);
       margin-top: 2px;
       font-variant-numeric: tabular-nums;
-    }
-
-    .top-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    /* Badge do Tema Omarchy */
-    .theme-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.78rem;
-      font-weight: 650;
-      padding: 5px 11px;
-      border-radius: var(--radius-pill);
-      background: var(--surface-card);
-      border: 1.5px solid var(--border-line);
-      color: var(--text-heading);
-      box-shadow: var(--shadow-subtle);
-      transition: all 0.2s var(--ease-tactile);
-    }
-
-    .theme-badge-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: var(--radius-pill);
-      background: var(--accent);
-      transition: background-color 0.2s;
-    }
-
-    .theme-refresh-btn {
-      background: var(--surface-card);
-      border: 1.5px solid var(--border-line);
-      color: var(--text-heading);
-      width: 34px;
-      height: 34px;
-      border-radius: var(--radius-md);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.1s var(--ease-tactile);
-      box-shadow: var(--shadow-subtle);
-    }
-
-    .theme-refresh-btn:hover {
-      background: var(--accent-soft);
-      border-color: var(--accent-border);
-      color: var(--accent);
-      transform: scale(1.04);
-    }
-
-    .theme-refresh-btn:active {
-      transform: scale(0.96);
-    }
-
-    /* Status de Sincronização */
-    .live-status {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.78rem;
-      font-weight: 600;
-      padding: 6px 12px;
-      border-radius: var(--radius-pill);
-      background: var(--accent-soft);
-      border: 1.5px solid var(--accent-border);
-      color: var(--text-heading);
-      transition: all 0.2s var(--ease-tactile);
-      user-select: none;
-      box-shadow: var(--shadow-subtle);
-    }
-
-    .status-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: var(--radius-pill);
-      background: var(--accent);
-      transition: background-color 0.2s;
-    }
-
-    .live-status.saving .status-dot {
-      animation: pulse-dot 0.9s infinite alternate ease-in-out;
-    }
-
-    .live-status.error {
-      background: var(--danger-soft);
-      border-color: var(--danger-border);
-      color: var(--danger-ink);
-    }
-
-    .live-status.error .status-dot {
-      background: var(--danger-ink);
-    }
-
-    @keyframes pulse-dot {
-      0% { opacity: 0.3; transform: scale(0.85); }
-      100% { opacity: 1; transform: scale(1.2); }
     }
 
     /* Cartão Principal */
@@ -720,21 +620,6 @@
         <h1>Metas Diárias</h1>
         <p id="formatted-date" aria-live="polite">Carregando data...</p>
       </div>
-      <div class="top-actions">
-        <div id="theme-badge" class="theme-badge" title="Tema ativo do Omarchy">
-          <span class="theme-badge-dot" id="theme-badge-dot"></span>
-          <span id="theme-name-text">Everforest</span>
-        </div>
-        <button type="button" id="theme-refresh-btn" class="theme-refresh-btn" title="Atualizar tema com Omarchy" aria-label="Atualizar tema com Omarchy">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
-          </svg>
-        </button>
-        <div id="sync-status" class="live-status" role="status" aria-live="polite">
-          <span class="status-dot"></span>
-          <span id="sync-text">Sincronizado</span>
-        </div>
-      </div>
     </header>
 
     <!-- Card Principal -->
@@ -829,10 +714,6 @@
 
   <script>
     // Gerenciamento e Adaptação Dinâmica ao Tema Omarchy
-    const themeNameText = document.getElementById('theme-name-text');
-    const themeRefreshBtn = document.getElementById('theme-refresh-btn');
-    const themeBadgeDot = document.getElementById('theme-badge-dot');
-
     function hexToRgba(hex, alpha) {
       if (!hex || hex.charAt(0) !== '#') return hex;
       let clean = hex.slice(1);
@@ -915,23 +796,13 @@
           root.style.setProperty('--danger-border', hexToRgba(c.red, 0.35));
         }
 
-        if (data.themeName) {
-          if (themeNameText) themeNameText.textContent = data.themeName;
-          if (themeRefreshBtn) {
-            themeRefreshBtn.title = 'Tema Omarchy: ' + data.themeName + ' (clique para sincronizar)';
-          }
-        }
-
         root.setAttribute('data-theme', isDark ? 'dark' : 'light');
       } catch (err) {
         console.warn('Não foi possível sincronizar o tema:', err);
       }
     }
 
-    // Atualiza tema ao clicar, ao focar na janela e periodicamente
-    themeRefreshBtn.addEventListener('click', function() {
-      applyOmarchyTheme();
-    });
+    // Atualiza tema ao focar na janela e periodicamente
     window.addEventListener('focus', applyOmarchyTheme);
     setInterval(applyOmarchyTheme, 4000);
 
@@ -949,8 +820,6 @@
     const nextDayBtn = document.getElementById('next-day-btn');
     const todayBtn = document.getElementById('today-btn');
     const formattedDateEl = document.getElementById('formatted-date');
-    const syncStatusEl = document.getElementById('sync-status');
-    const syncTextEl = document.getElementById('sync-text');
     const addForm = document.getElementById('add-form');
     const newGoalInput = document.getElementById('new-goal-input');
     const goalsList = document.getElementById('goals-list');
@@ -1011,19 +880,7 @@
       setDate(getLocalDateDMY(date));
     }
 
-    // Atualiza indicador visual de sincronização
-    function setSyncStatus(state, message) {
-      syncStatusEl.className = 'live-status';
-      if (state === 'saving') {
-        syncStatusEl.classList.add('saving');
-        syncTextEl.textContent = message || 'Salvando...';
-      } else if (state === 'error') {
-        syncStatusEl.classList.add('error');
-        syncTextEl.textContent = message || 'Erro ao salvar';
-      } else {
-        syncTextEl.textContent = message || 'Sincronizado';
-      }
-    }
+    function setSyncStatus() {}
 
     // Atualiza barra e percentual de progresso
     function updateProgress() {
