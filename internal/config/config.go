@@ -20,7 +20,10 @@ func Load() *Config {
 		port = defaultPort
 	}
 
-	metasDir := os.Getenv("METAS_DIR")
+	metasDir := os.Getenv("GOALS_DIR")
+	if metasDir == "" {
+		metasDir = os.Getenv("METAS_DIR")
+	}
 	if metasDir == "" {
 		metasDir = defaultMetasDir
 	}

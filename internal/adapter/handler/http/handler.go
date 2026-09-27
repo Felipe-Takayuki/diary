@@ -43,6 +43,7 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("/", h.ServeUI)
 	mux.HandleFunc("/favicon.svg", h.ServeFaviconSVG)
 	mux.HandleFunc("/favicon.ico", h.ServeFaviconICO)
+	mux.HandleFunc("/api/goals", h.HandleGoals)
 	mux.HandleFunc("/api/metas", h.HandleMetas)
 	mux.HandleFunc("/api/theme", h.HandleTheme)
 }
@@ -50,7 +51,7 @@ func (h *Handler) RegisterRoutes(mux *http.ServeMux) {
 // ServeFaviconSVG serves the vector favicon.
 func (h *Handler) ServeFaviconSVG(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		http.Error(w, "Método não permitido", http.StatusMethodNotAllowed)
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 	if len(h.faviconSVG) == 0 {
@@ -66,7 +67,7 @@ func (h *Handler) ServeFaviconSVG(w http.ResponseWriter, r *http.Request) {
 // ServeFaviconICO serves the ICO favicon.
 func (h *Handler) ServeFaviconICO(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		http.Error(w, "Método não permitido", http.StatusMethodNotAllowed)
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 	if len(h.faviconICO) == 0 {
@@ -86,7 +87,7 @@ func (h *Handler) ServeUI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if r.Method != http.MethodGet {
-		http.Error(w, "Método não permitido", http.StatusMethodNotAllowed)
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -95,22 +96,27 @@ func (h *Handler) ServeUI(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write(h.webContent)
 }
 
-// HandleMetas dispatches GET and POST requests for /api/metas.
-func (h *Handler) HandleMetas(w http.ResponseWriter, r *http.Request) {
+// HandleGoals dispatches GET and POST requests for /api/goals.
+func (h *Handler) HandleGoals(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		h.getMetas(w, r)
 	case http.MethodPost:
 		h.saveMetas(w, r)
 	default:
-		http.Error(w, "Método não permitido", http.StatusMethodNotAllowed)
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
+}
+
+// HandleMetas dispatches GET and POST requests for /api/metas (alias for backward compatibility).
+func (h *Handler) HandleMetas(w http.ResponseWriter, r *http.Request) {
+	h.HandleGoals(w, r)
 }
 
 // HandleTheme handles GET /api/theme returning active theme colors.
 func (h *Handler) HandleTheme(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
-		http.Error(w, "Método não permitido", http.StatusMethodNotAllowed)
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 	h.writeJSON(w, http.StatusOK, h.themeService.GetCurrentTheme())
@@ -124,8 +130,8 @@ func (h *Handler) getMetas(w http.ResponseWriter, r *http.Request) {
 			h.writeJSONError(w, http.StatusBadRequest, err.Error())
 			return
 		}
-		log.Printf("Erro ao carregar metas (%s): %v", rawDate, err)
-		h.writeJSONError(w, http.StatusInternalServerError, "Erro interno ao carregar metas")
+		log.Printf("Error loading goals (%s): %v", rawDate, err)
+		h.writeJSONError(w, http.StatusInternalServerError, "Internal server error loading goals")
 		return
 	}
 
@@ -146,7 +152,7 @@ func (h *Handler) getMetas(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) saveMetas(w http.ResponseWriter, r *http.Request) {
 	var payload SaveMetasRequest
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		h.writeJSONError(w, http.StatusBadRequest, "JSON inválido")
+		h.writeJSONError(w, http.StatusBadRequest, "Invalid JSON payload")
 		return
 	}
 
@@ -166,8 +172,8 @@ func (h *Handler) saveMetas(w http.ResponseWriter, r *http.Request) {
 			h.writeJSONError(w, http.StatusBadRequest, err.Error())
 			return
 		}
-		log.Printf("Erro ao salvar metas (%s): %v", payload.Date, err)
-		h.writeJSONError(w, http.StatusInternalServerError, "Erro interno ao salvar metas")
+		log.Printf("Error saving goals (%s): %v", payload.Date, err)
+		h.writeJSONError(w, http.StatusInternalServerError, "Internal server error saving goals")
 		return
 	}
 
@@ -178,7 +184,7 @@ func (h *Handler) writeJSON(w http.ResponseWriter, status int, data any) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(status)
 	if err := json.NewEncoder(w).Encode(data); err != nil {
-		log.Printf("Erro ao codificar resposta JSON: %v", err)
+		log.Printf("Error encoding JSON response: %v", err)
 	}
 }
 

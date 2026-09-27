@@ -20,7 +20,7 @@ type Repository struct {
 // NewRepository creates a new Markdown repository and ensures the target directory exists.
 func NewRepository(dir string) (*Repository, error) {
 	if err := os.MkdirAll(dir, 0755); err != nil {
-		return nil, fmt.Errorf("falha ao criar diretório %s: %w", dir, err)
+		return nil, fmt.Errorf("failed to create directory %s: %w", dir, err)
 	}
 	return &Repository{dir: dir}, nil
 }
@@ -61,7 +61,7 @@ func (r *Repository) LoadByDate(_ context.Context, date domain.Date) (*domain.Da
 			}
 			return domain.NewDailyGoal(date, []domain.Item{}), nil
 		}
-		return nil, fmt.Errorf("erro ao abrir arquivo %s: %w", path, err)
+		return nil, fmt.Errorf("error opening file %s: %w", path, err)
 	}
 	defer file.Close()
 
@@ -82,7 +82,7 @@ func (r *Repository) Save(_ context.Context, goal *domain.DailyGoal) error {
 	path := r.filePath(goal.Date())
 
 	if err := os.WriteFile(path, []byte(content), 0644); err != nil {
-		return fmt.Errorf("erro ao salvar arquivo %s: %w", path, err)
+		return fmt.Errorf("error saving file %s: %w", path, err)
 	}
 
 	return nil

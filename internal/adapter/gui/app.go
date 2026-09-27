@@ -47,7 +47,7 @@ func NewDesktopApp(useCase usecase.DailyGoalUseCase, themeService omarchytheme.S
 	currentTheme := themeService.GetCurrentTheme()
 	a.Settings().SetTheme(NewOmarchyTheme(currentTheme))
 
-	w := a.NewWindow("Diary - Metas Diárias")
+	w := a.NewWindow("Diary - Daily Goals")
 	w.Resize(fyne.NewSize(480, 620))
 
 	if len(AppIconBytes) > 0 {
@@ -77,7 +77,7 @@ func (d *DesktopApp) Run() {
 func (d *DesktopApp) setupUI() {
 	// 1. Branding Header
 	title := widget.NewLabelWithStyle("Diary", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
-	subtitle := widget.NewLabel("Metas Diárias")
+	subtitle := widget.NewLabel("Daily Goals")
 
 	var brandIcon fyne.CanvasObject
 	if len(AppIconBytes) > 0 {
@@ -97,7 +97,7 @@ func (d *DesktopApp) setupUI() {
 	nextBtn := widget.NewButtonWithIcon("", theme.NavigateNextIcon(), func() {
 		d.loadDate(d.currentDate.AddDays(1))
 	})
-	todayBtn := widget.NewButton("Hoje", func() {
+	todayBtn := widget.NewButton("Today", func() {
 		d.loadDate(domain.Today())
 	})
 
@@ -105,19 +105,19 @@ func (d *DesktopApp) setupUI() {
 	dateNav := container.NewBorder(nil, nil, prevBtn, container.NewHBox(nextBtn, todayBtn), d.dateLabel)
 
 	// 3. Progress Module
-	d.progressLabel = widget.NewLabel("0 de 0 concluídas (0%)")
+	d.progressLabel = widget.NewLabel("0 of 0 completed (0%)")
 	d.progressBar = widget.NewProgressBar()
 	d.progressBar.SetValue(0)
 	progressBox := container.NewVBox(d.progressLabel, d.progressBar)
 
 	// 4. Input Row
 	d.newGoalEntry = widget.NewEntry()
-	d.newGoalEntry.SetPlaceHolder("O que você quer concluir hoje? (Pressione Enter)")
+	d.newGoalEntry.SetPlaceHolder("What do you want to accomplish today? (Press Enter)")
 	d.newGoalEntry.OnSubmitted = func(text string) {
 		d.addGoal(text)
 	}
 
-	addBtn := widget.NewButtonWithIcon("Adicionar", theme.ContentAddIcon(), func() {
+	addBtn := widget.NewButtonWithIcon("Add", theme.ContentAddIcon(), func() {
 		d.addGoal(d.newGoalEntry.Text)
 	})
 
@@ -128,7 +128,7 @@ func (d *DesktopApp) setupUI() {
 	tasksScroll := container.NewVScroll(d.tasksBox)
 
 	// 6. Footer / Status
-	d.statusLabel = widget.NewLabelWithStyle("Salvo localmente em Markdown", fyne.TextAlignCenter, fyne.TextStyle{Italic: true})
+	d.statusLabel = widget.NewLabelWithStyle("Saved locally in Markdown", fyne.TextAlignCenter, fyne.TextStyle{Italic: true})
 
 	// Layout Composition
 	topBox := container.NewVBox(
@@ -167,7 +167,7 @@ func (d *DesktopApp) loadDate(target domain.Date) {
 
 	goal, err := d.useCase.GetDailyGoals(context.Background(), target.String())
 	if err != nil {
-		d.statusLabel.SetText(fmt.Sprintf("Erro ao carregar metas: %v", err))
+		d.statusLabel.SetText(fmt.Sprintf("Error loading goals: %v", err))
 		return
 	}
 
@@ -188,13 +188,13 @@ func (d *DesktopApp) renderGoals() {
 		fraction = float64(completed) / float64(total)
 	}
 	d.progressBar.SetValue(fraction)
-	d.progressLabel.SetText(fmt.Sprintf("%d de %d concluídas (%d%%)", completed, total, d.currentGoal.ProgressPercentage()))
+	d.progressLabel.SetText(fmt.Sprintf("%d of %d completed (%d%%)", completed, total, d.currentGoal.ProgressPercentage()))
 
 	if total == 0 {
-		emptyMsg := widget.NewLabelWithStyle("Nenhuma meta para este dia.\nAdicione uma meta acima para começar!", fyne.TextAlignCenter, fyne.TextStyle{Italic: true})
+		emptyMsg := widget.NewLabelWithStyle("No goals for this day yet.\nAdd a new goal above to get started!", fyne.TextAlignCenter, fyne.TextStyle{Italic: true})
 		d.tasksBox.Add(container.NewCenter(emptyMsg))
 		d.tasksBox.Refresh()
-		d.statusLabel.SetText(fmt.Sprintf("Arquivo: ./metas/%s.md", d.currentDate.String()))
+		d.statusLabel.SetText(fmt.Sprintf("File: ./metas/%s.md", d.currentDate.String()))
 		return
 	}
 
@@ -226,7 +226,7 @@ func (d *DesktopApp) renderGoals() {
 	}
 
 	d.tasksBox.Refresh()
-	d.statusLabel.SetText(fmt.Sprintf("Arquivo: ./metas/%s.md (atualizado)", d.currentDate.String()))
+	d.statusLabel.SetText(fmt.Sprintf("File: ./metas/%s.md (saved)", d.currentDate.String()))
 }
 
 func (d *DesktopApp) addGoal(text string) {
@@ -237,14 +237,14 @@ func (d *DesktopApp) addGoal(text string) {
 
 	newItem, err := domain.NewItem(text, false)
 	if err != nil {
-		d.statusLabel.SetText(fmt.Sprintf("Texto inválido: %v", err))
+		d.statusLabel.SetText(fmt.Sprintf("Invalid text: %v", err))
 		return
 	}
 	newItems := append(d.currentGoal.Items(), newItem)
 
 	saved, err := d.useCase.SaveDailyGoals(context.Background(), d.currentDate.String(), newItems)
 	if err != nil {
-		d.statusLabel.SetText(fmt.Sprintf("Erro ao salvar: %v", err))
+		d.statusLabel.SetText(fmt.Sprintf("Error saving: %v", err))
 		return
 	}
 
@@ -265,7 +265,7 @@ func (d *DesktopApp) toggleGoal(idx int) {
 
 	saved, err := d.useCase.SaveDailyGoals(context.Background(), d.currentDate.String(), newItems)
 	if err != nil {
-		d.statusLabel.SetText(fmt.Sprintf("Erro ao alternar meta: %v", err))
+		d.statusLabel.SetText(fmt.Sprintf("Error toggling goal: %v", err))
 		return
 	}
 
@@ -284,7 +284,7 @@ func (d *DesktopApp) deleteGoal(idx int) {
 
 	saved, err := d.useCase.SaveDailyGoals(context.Background(), d.currentDate.String(), newItems)
 	if err != nil {
-		d.statusLabel.SetText(fmt.Sprintf("Erro ao excluir: %v", err))
+		d.statusLabel.SetText(fmt.Sprintf("Error deleting: %v", err))
 		return
 	}
 
@@ -294,36 +294,7 @@ func (d *DesktopApp) deleteGoal(idx int) {
 
 func (d *DesktopApp) formatDateHeading(dt domain.Date) string {
 	t := dt.Time()
-	weekdayMap := map[time.Weekday]string{
-		time.Sunday:    "Domingo",
-		time.Monday:    "Segunda-feira",
-		time.Tuesday:   "Terça-feira",
-		time.Wednesday: "Quarta-feira",
-		time.Thursday:  "Quinta-feira",
-		time.Friday:    "Sexta-feira",
-		time.Saturday:  "Sábado",
-	}
-	monthMap := map[time.Month]string{
-		time.January:   "Janeiro",
-		time.February:  "Fevereiro",
-		time.March:     "Março",
-		time.April:     "Abril",
-		time.May:       "Maio",
-		time.June:      "Junho",
-		time.July:      "Julho",
-		time.August:    "Agosto",
-		time.September: "Setembro",
-		time.October:   "Outubro",
-		time.November:  "Novembro",
-		time.December:  "Dezembro",
-	}
-
-	return fmt.Sprintf("%s, %02d de %s de %d",
-		weekdayMap[t.Weekday()],
-		t.Day(),
-		monthMap[t.Month()],
-		t.Year(),
-	)
+	return t.Format("Monday, 02 January 2006")
 }
 
 func (d *DesktopApp) startThemeWatcher() {

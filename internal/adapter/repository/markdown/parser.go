@@ -30,7 +30,7 @@ func parseMarkdown(r io.Reader) ([]domain.Item, error) {
 	}
 
 	if err := scanner.Err(); err != nil {
-		return nil, fmt.Errorf("erro na leitura do arquivo markdown: %w", err)
+		return nil, fmt.Errorf("error reading markdown file: %w", err)
 	}
 
 	if items == nil {
@@ -43,7 +43,7 @@ func parseMarkdown(r io.Reader) ([]domain.Item, error) {
 // formatMarkdown serializes daily goals into Markdown checklist format.
 func formatMarkdown(date domain.Date, items []domain.Item) string {
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("# Metas - %s\n\n", date.String()))
+	sb.WriteString(fmt.Sprintf("# Goals - %s\n\n", date.String()))
 
 	for _, item := range items {
 		status := " "

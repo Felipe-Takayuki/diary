@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="pt-BR" data-theme="dark">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Diary - Metas Diárias</title>
-  <meta name="description" content="Gerenciador minimalista de metas diárias local-first integrado ao tema do Omarchy.">
+  <title>Diary - Daily Goals</title>
+  <meta name="description" content="Minimalist local-first daily goals manager with Omarchy theme integration.">
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="alternate icon" href="/favicon.ico">
   <style>
@@ -669,21 +669,21 @@
 
     <!-- Card Principal -->
     <main class="card-core">
-      <!-- Seletor de Data -->
-      <section class="date-navigator" aria-label="Navegação de datas">
-        <button type="button" class="nav-arrow-btn" id="prev-day-btn" title="Dia anterior" aria-label="Dia anterior">‹</button>
+      <!-- Date Selector -->
+      <section class="date-navigator" aria-label="Date navigation">
+        <button type="button" class="nav-arrow-btn" id="prev-day-btn" title="Previous day" aria-label="Previous day">‹</button>
         <div class="date-input-wrapper">
-          <label for="date-display" class="sr-only">Data selecionada em formato dia, mês e ano</label>
+          <label for="date-display" class="sr-only">Selected date in day, month and year format</label>
           <input 
             type="text" 
             id="date-display" 
             class="date-text-box" 
-            placeholder="DD/MM/AAAA" 
+            placeholder="DD/MM/YYYY" 
             maxlength="10" 
             autocomplete="off"
-            title="Formato: DD/MM/AAAA"
+            title="Format: DD/MM/YYYY"
           >
-          <button type="button" class="cal-icon-btn" id="calendar-btn" title="Abrir calendário" aria-label="Abrir calendário">
+          <button type="button" class="cal-icon-btn" id="calendar-btn" title="Open calendar" aria-label="Open calendar">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
               <line x1="16" y1="2" x2="16" y2="6"></line>
@@ -693,16 +693,16 @@
           </button>
           <input type="date" id="native-date-picker" tabindex="-1" aria-hidden="true" style="position: absolute; opacity: 0; pointer-events: none; width: 0; height: 0;">
         </div>
-        <button type="button" class="nav-arrow-btn" id="next-day-btn" title="Próximo dia" aria-label="Próximo dia">›</button>
-        <button type="button" class="today-action-btn" id="today-btn">Hoje</button>
+        <button type="button" class="nav-arrow-btn" id="next-day-btn" title="Next day" aria-label="Next day">›</button>
+        <button type="button" class="today-action-btn" id="today-btn">Today</button>
       </section>
 
-      <!-- Progresso com barra fluida e acessibilidade -->
-      <section class="progress-module" aria-label="Progresso das metas">
+      <!-- Progress Module -->
+      <section class="progress-module" aria-label="Daily goals progress">
         <div class="progress-meta">
-          <span id="progress-text">0 de 0 concluídas</span>
+          <span id="progress-text">0 of 0 completed</span>
           <div class="progress-badges-wrap">
-            <span id="completion-badge" class="completion-badge">Concluído!</span>
+            <span id="completion-badge" class="completion-badge">Completed!</span>
             <span id="progress-percent" class="progress-percent-badge">0%</span>
           </div>
         </div>
@@ -713,20 +713,20 @@
           aria-valuenow="0" 
           aria-valuemin="0" 
           aria-valuemax="100" 
-          aria-label="Porcentagem de metas concluídas"
+          aria-label="Percentage of completed goals"
         >
           <div class="progress-fluid-fill" id="progress-fill"></div>
         </div>
       </section>
 
-      <!-- Formulário de Nova Meta -->
-      <form class="input-row-form" id="add-form" aria-label="Adicionar nova meta">
-        <label for="new-goal-input" class="sr-only">Texto da nova meta</label>
+      <!-- Add New Goal Form -->
+      <form class="input-row-form" id="add-form" aria-label="Add new goal">
+        <label for="new-goal-input" class="sr-only">New goal text</label>
         <input 
           type="text" 
           class="text-goal-input" 
           id="new-goal-input" 
-          placeholder="O que você quer concluir hoje? (aperte / para focar)" 
+          placeholder="What do you want to accomplish today? (press / to focus)" 
           autocomplete="off"
           required
         >
@@ -735,25 +735,25 @@
             <line x1="12" y1="5" x2="12" y2="19"></line>
             <line x1="5" y1="12" x2="19" y2="12"></line>
           </svg>
-          Adicionar
+          Add
         </button>
       </form>
 
-      <!-- Lista de Metas -->
-      <ul class="items-stack" id="goals-list" aria-label="Lista de metas do dia"></ul>
+      <!-- Goals List -->
+      <ul class="items-stack" id="goals-list" aria-label="Daily goals list"></ul>
     </main>
 
-    <!-- Atalhos de Teclado -->
-    <div class="shortcuts-bar" aria-label="Atalhos de teclado úteis">
-      <span class="shortcut-item"><kbd>/</kbd> Nova meta</span>
-      <span class="shortcut-item"><kbd>←</kbd> <kbd>→</kbd> Mudar dia</span>
-      <span class="shortcut-item"><kbd>T</kbd> Hoje</span>
-      <span class="shortcut-item"><kbd>Esc</kbd> Desfocar</span>
+    <!-- Keyboard Shortcuts -->
+    <div class="shortcuts-bar" aria-label="Keyboard shortcuts">
+      <span class="shortcut-item"><kbd>/</kbd> New goal</span>
+      <span class="shortcut-item"><kbd>←</kbd> <kbd>→</kbd> Change day</span>
+      <span class="shortcut-item"><kbd>T</kbd> Today</span>
+      <span class="shortcut-item"><kbd>Esc</kbd> Unfocus</span>
     </div>
 
-    <!-- Rodapé -->
+    <!-- Footer -->
     <footer>
-      Notas salvas localmente em Markdown na pasta <code>./metas</code>. Seus dados permanecem com você.
+      Notes saved locally in Markdown in folder <code>./metas</code>. Your data stays with you.
     </footer>
   </div>
 
@@ -896,18 +896,18 @@
       return day + '-' + month + '-' + year;
     }
 
-    // Atualiza cabeçalho legível (exemplo: "Sábado • 26/09/2026")
+    // Updates formatted date heading (e.g., "Saturday • 26/09/2026")
     function updateDateLabel(dmyStr) {
       if (!dmyStr) return;
       const parts = dmyStr.split('-').map(Number);
       const dateObj = new Date(parts[2], parts[1] - 1, parts[0]);
-      const weekday = dateObj.toLocaleDateString('pt-BR', { weekday: 'long' });
+      const weekday = dateObj.toLocaleDateString('en-US', { weekday: 'long' });
       const capitalized = weekday.charAt(0).toUpperCase() + weekday.slice(1);
       const dayFormatted = String(parts[0]).padStart(2, '0') + '/' + String(parts[1]).padStart(2, '0') + '/' + parts[2];
       formattedDateEl.textContent = capitalized + ' • ' + dayFormatted;
     }
 
-    // Aplica data selecionada e sincroniza dados
+    // Applies selected date and syncs data
     function setDate(dmyStr) {
       currentDate = dmyStr;
       dateDisplay.value = dmyToSlash(dmyStr);
@@ -916,7 +916,7 @@
       loadMetas(currentDate);
     }
 
-    // Navegação de dias
+    // Day navigation
     function shiftDate(deltaDays) {
       if (!currentDate) return;
       const parts = currentDate.split('-').map(Number);
@@ -927,11 +927,11 @@
 
     function setSyncStatus() {}
 
-    // Atualiza barra e percentual de progresso
+    // Updates progress bar and completion percentage
     function updateProgress() {
       const total = currentItems.length;
       if (total === 0) {
-        progressText.textContent = 'Nenhuma meta definida';
+        progressText.textContent = 'No goals set';
         progressPercent.textContent = '0%';
         progressFill.style.width = '0%';
         progressFill.classList.remove('complete');
@@ -942,7 +942,7 @@
 
       const done = currentItems.filter(function(i) { return i.done; }).length;
       const pct = Math.round((done / total) * 100);
-      progressText.textContent = done + ' de ' + total + ' concluída' + (total > 1 ? 's' : '');
+      progressText.textContent = done + ' of ' + total + ' completed';
       progressPercent.textContent = pct + '%';
       progressFill.style.width = pct + '%';
       progressBarEl.setAttribute('aria-valuenow', String(pct));
@@ -956,7 +956,7 @@
       }
     }
 
-    // Renderiza itens da lista de metas
+    // Renders goal items
     function renderList() {
       goalsList.innerHTML = '';
       updateProgress();
@@ -969,8 +969,8 @@
             '<line x1="9" y1="13" x2="15" y2="13"></line>' +
             '<line x1="9" y1="17" x2="12" y2="17"></line>' +
           '</svg>' +
-          '<div class="empty-title">Nenhuma meta por enquanto</div>' +
-          '<div class="empty-hint">Adicione seu primeiro item para planejar o que deseja concluir hoje.</div>' +
+          '<div class="empty-title">No goals yet</div>' +
+          '<div class="empty-hint">Add your first item above to plan what you want to achieve today.</div>' +
         '</li>';
         return;
       }
@@ -984,7 +984,7 @@
         checkbox.className = 'checkbox-control';
         checkbox.checked = item.done;
         checkbox.id = 'goal-item-' + index;
-        checkbox.setAttribute('aria-label', (item.done ? 'Marcar como não concluída: ' : 'Marcar como concluída: ') + item.text);
+        checkbox.setAttribute('aria-label', (item.done ? 'Mark as incomplete: ' : 'Mark as completed: ') + item.text);
         checkbox.addEventListener('change', function() { toggleItem(index); });
 
         const label = document.createElement('label');
@@ -995,8 +995,8 @@
         const deleteBtn = document.createElement('button');
         deleteBtn.type = 'button';
         deleteBtn.className = 'remove-item-btn';
-        deleteBtn.title = 'Remover meta';
-        deleteBtn.setAttribute('aria-label', 'Remover meta: ' + item.text);
+        deleteBtn.title = 'Remove goal';
+        deleteBtn.setAttribute('aria-label', 'Remove goal: ' + item.text);
         deleteBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
           '<line x1="18" y1="6" x2="6" y2="18"></line>' +
           '<line x1="6" y1="6" x2="18" y2="18"></line>' +
@@ -1013,33 +1013,33 @@
       });
     }
 
-    // Carrega metas via GET /api/metas?date=DD-MM-YYYY
+    // Loads goals via GET /api/goals (or /api/metas)
     async function loadMetas(date) {
-      setSyncStatus('saving', 'Carregando...');
+      setSyncStatus('saving', 'Loading...');
       try {
-        const res = await fetch('/api/metas?date=' + encodeURIComponent(date));
-        if (!res.ok) throw new Error('Falha na resposta do servidor');
+        const res = await fetch('/api/goals?date=' + encodeURIComponent(date));
+        if (!res.ok) throw new Error('Server response failed');
         const data = await res.json();
         
         if (data.date === currentDate) {
           currentItems = data.items || [];
           renderList();
-          setSyncStatus('ok', 'Sincronizado');
+          setSyncStatus('ok', 'Synchronized');
         }
       } catch (err) {
         console.error(err);
-        setSyncStatus('error', 'Erro ao carregar');
+        setSyncStatus('error', 'Error loading');
       }
     }
 
-    // Salva metas via POST /api/metas
+    // Saves goals via POST /api/goals
     async function syncMetas() {
       if (isSaving) {
         pendingSave = true;
         return;
       }
       isSaving = true;
-      setSyncStatus('saving', 'Salvando...');
+      setSyncStatus('saving', 'Saving...');
 
       const targetDate = currentDate;
       const targetItems = currentItems.map(function(item) {
@@ -1047,7 +1047,7 @@
       });
 
       try {
-        const res = await fetch('/api/metas', {
+        const res = await fetch('/api/goals', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -1056,11 +1056,11 @@
           })
         });
 
-        if (!res.ok) throw new Error('Falha ao salvar metas');
-        setSyncStatus('ok', 'Sincronizado');
+        if (!res.ok) throw new Error('Failed to save goals');
+        setSyncStatus('ok', 'Synchronized');
       } catch (err) {
         console.error(err);
-        setSyncStatus('error', 'Erro ao salvar');
+        setSyncStatus('error', 'Error saving');
       } finally {
         isSaving = false;
         if (pendingSave) {
@@ -1070,7 +1070,7 @@
       }
     }
 
-    // Alterna estado da meta
+    // Toggles goal status
     function toggleItem(index) {
       if (!currentItems[index]) return;
       currentItems[index].done = !currentItems[index].done;
@@ -1078,14 +1078,14 @@
       syncMetas();
     }
 
-    // Remove uma meta
+    // Deletes a goal
     function deleteItem(index) {
       currentItems.splice(index, 1);
       renderList();
       syncMetas();
     }
 
-    // Adiciona uma nova meta
+    // Adds a new goal
     function addItem(text) {
       const trimmed = text.trim();
       if (!trimmed) return;
@@ -1095,7 +1095,7 @@
       syncMetas();
     }
 
-    // Valida e aplica data digitada no campo DD/MM/AAAA
+    // Validates and applies date typed in the DD/MM/YYYY field
     function validateAndApplyInput() {
       const val = dateDisplay.value.trim();
       const clean = val.replace(/\//g, '-');

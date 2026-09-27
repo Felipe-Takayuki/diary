@@ -1,48 +1,51 @@
-# Guia de Contribuição
+# Contributing Guide
 
-Obrigado pelo interesse em contribuir com o Diary. Este projeto foi concebido em Go com foco em simplicidade, privacidade local e zero dependências externas em tempo de execução.
+Thank you for your interest in contributing to Diary! This project is crafted in Go with a strong commitment to simplicity, local-first privacy, clean architecture, and zero external runtime dependencies.
 
-## Como começar
+## Getting Started
 
-1. Faça um fork do repositório no GitHub.
-2. Clone seu fork para seu computador:
+1. Fork the repository on GitHub: [github.com/Felipe-Takayuki/diary](https://github.com/Felipe-Takayuki/diary)
+2. Clone your fork to your machine:
    ```bash
    git clone https://github.com/Felipe-Takayuki/diary.git
    cd diary
    ```
-3. Crie uma branch para sua alteração:
+3. Create a branch for your feature or bugfix:
    ```bash
-   git checkout -b minha-melhoria
+   git checkout -b feature/my-improvement
    ```
 
-## Princípios do Projeto
+## Project Principles
 
-- **Zero dependências externas:** Usamos exclusivamente a biblioteca padrão do Go no servidor e HTML, CSS e JavaScript nativos no navegador. Evite adicionar bibliotecas externas.
-- **Clean Architecture:** Mantenha as regras de negócio puras em `internal/domain`, orquestração em `internal/usecase` e detalhes de entrega em `internal/adapter`.
-- **Formato Markdown direto:** A persistência grava tarefas em arquivos Markdown puros no formato `metas/DD-MM-YYYY.md`.
-- **Acessibilidade visual:** Qualquer mudança na interface precisa respeitar alto contraste (WCAG AAA), navegação por teclado e compatibilidade com modo claro e escuro.
+- **Zero runtime dependencies:** The core and server rely exclusively on the Go standard library, while web assets use vanilla HTML, CSS, and modern JavaScript. Avoid introducing heavy external frameworks.
+- **Clean Architecture:** Maintain domain logic pure in `internal/domain`, application orchestration in `internal/usecase`, and delivery adapters in `internal/adapter`.
+- **Transparent Markdown persistence:** Goals are saved locally as plain Markdown checklist files in `metas/DD-MM-YYYY.md` (e.g., `- [ ]` and `- [x]`).
+- **Visual accessibility & Omarchy integration:** Interface components must follow high-contrast guidelines (WCAG AAA), complete keyboard navigation, and seamless light/dark theme adaptation.
 
-## Verificações locais
+## Local Verification
 
-Antes de abrir um Pull Request, execute a suíte completa pelo Makefile:
+Before opening a Pull Request, ensure that all checks pass:
 
 ```bash
-# Executa testes unitários
+# Run all unit tests
 make test
 
-# Testa condições de corrida (race detector)
+# Run tests with the Go race detector
 make test-race
 
-# Formata o código e roda a análise estática
+# Check test coverage
+make test-cover
+
+# Format code and run static analysis
 make fmt
 make vet
 
-# Valida a compilação do binário
+# Build the desktop binary
 make build
 ```
 
-## Enviando seu Pull Request
+## Submitting a Pull Request
 
-1. Use mensagens de commit claras no padrão Conventional Commits (por exemplo: `feat:`, `fix:`, `docs:`, `refactor:` ou `test:`).
-2. Adicione testes para novas regras de domínio ou novos casos de uso.
-3. Abra seu Pull Request descrevendo a mudança de forma objetiva.
+1. Follow the **Conventional Commits** specification (e.g., `feat:`, `fix:`, `docs:`, `style:`, `refactor:`, or `test:`).
+2. Include unit tests for any new business logic, domain models, or use cases.
+3. Open a Pull Request with a clear description of the problem solved, design choices, and screenshots if UI changes were made.

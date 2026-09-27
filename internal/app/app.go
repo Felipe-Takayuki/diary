@@ -22,7 +22,7 @@ func Run() error {
 	// 1. Secondary Adapter (Persistence / Repository)
 	repo, err := markdown.NewRepository(cfg.MetasDir)
 	if err != nil {
-		return fmt.Errorf("erro na inicialização do armazenamento: %w", err)
+		return fmt.Errorf("failed to initialize storage: %w", err)
 	}
 
 	// 2. Use Case (Application Layer)
@@ -64,15 +64,15 @@ func runWebServer(cfg *config.Config, useCase usecase.DailyGoalUseCase, themeSer
 
 func logDesktopBanner(cfg *config.Config) {
 	log.Printf("==================================================")
-	log.Printf(" Diary - Aplicativo Desktop Nativo (Omarchy / Hyprland)")
-	log.Printf(" Armazenamento local: %s", cfg.MetasDir)
+	log.Printf(" Diary - Native Desktop Application (Omarchy / Hyprland)")
+	log.Printf(" Local storage: %s", cfg.MetasDir)
 	log.Printf("==================================================")
 }
 
 func logWebBanner(cfg *config.Config) {
 	log.Printf("==================================================")
-	log.Printf(" Servidor Web iniciado com sucesso (Modo Headless)")
-	log.Printf(" Acesse em: http://localhost:%s", cfg.Port)
-	log.Printf(" Diretório de armazenamento: %s", cfg.MetasDir)
+	log.Printf(" Web server started successfully (Headless mode)")
+	log.Printf(" Available at: http://localhost:%s", cfg.Port)
+	log.Printf(" Local storage: %s", cfg.MetasDir)
 	log.Printf("==================================================")
 }

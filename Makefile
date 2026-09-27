@@ -34,4 +34,4 @@ install: build
 	cp assets/com.omarchy.diary.desktop $(HOME)/.local/share/applications/
 	cp assets/icon.svg $(HOME)/.local/share/icons/hicolor/scalable/apps/diary.svg
 	cp assets/icon.png $(HOME)/.local/share/icons/hicolor/64x64/apps/diary.png
-	@echo "Diary instalado com sucesso em $(HOME)/.local/bin/diary!"
+	@echo "Diary successfully installed to $(HOME)/.local/bin/diary!"
