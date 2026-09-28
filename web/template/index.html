@@ -753,7 +753,7 @@
 
     <!-- Footer -->
     <footer>
-      Notes saved locally in Markdown in folder <code>./metas</code>. Your data stays with you.
+      Notes saved locally in Markdown. Your data stays with you.
     </footer>
   </div>
 
@@ -847,9 +847,19 @@
       }
     }
 
-    // Atualiza tema ao focar na janela e periodicamente
-    window.addEventListener('focus', applyOmarchyTheme);
-    setInterval(applyOmarchyTheme, 4000);
+    // Atualiza tema e dados ao focar na janela e periodicamente
+    window.addEventListener('focus', function() {
+      applyOmarchyTheme();
+      if (!isSaving && !pendingSave && currentDate) {
+        loadMetas(currentDate, true);
+      }
+    });
+    setInterval(function() {
+      applyOmarchyTheme();
+      if (!isSaving && !pendingSave && currentDate) {
+        loadMetas(currentDate, true);
+      }
+    }, 3000);
 
     // Estado da aplicação (formato canônico DD-MM-YYYY)
     let currentDate = '';
@@ -1014,21 +1024,32 @@
     }
 
     // Loads goals via GET /api/goals (or /api/metas)
-    async function loadMetas(date) {
-      setSyncStatus('saving', 'Loading...');
+    async function loadMetas(date, silent = false) {
+      if (!silent) {
+        setSyncStatus('saving', 'Loading...');
+      }
       try {
         const res = await fetch('/api/goals?date=' + encodeURIComponent(date));
         if (!res.ok) throw new Error('Server response failed');
         const data = await res.json();
         
         if (data.date === currentDate) {
-          currentItems = data.items || [];
-          renderList();
-          setSyncStatus('ok', 'Synchronized');
+          const fetchedItems = data.items || [];
+          const currentJson = JSON.stringify(currentItems);
+          const fetchedJson = JSON.stringify(fetchedItems);
+          if (currentJson !== fetchedJson) {
+            currentItems = fetchedItems;
+            renderList();
+          }
+          if (!silent) {
+            setSyncStatus('ok', 'Synchronized');
+          }
         }
       } catch (err) {
-        console.error(err);
-        setSyncStatus('error', 'Error loading');
+        if (!silent) {
+          console.error(err);
+          setSyncStatus('error', 'Error loading');
+        }
       }
     }
 

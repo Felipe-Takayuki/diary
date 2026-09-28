@@ -1,10 +1,10 @@
 package app
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 
 	guiadapter "diary/internal/adapter/gui"
 	deliveryhttp "diary/internal/adapter/handler/http"
@@ -15,9 +15,13 @@ import (
 	"diary/web"
 )
 
-// Run bootstraps application dependencies and launches the native desktop app.
+// Run bootstraps application dependencies and launches the application.
 func Run() error {
 	cfg := config.Load()
+	if cfg.Help {
+		config.PrintHelp()
+		return nil
+	}
 
 	// 1. Secondary Adapter (Persistence / Repository)
 	repo, err := markdown.NewRepository(cfg.MetasDir)
@@ -31,15 +35,24 @@ func Run() error {
 	// 3. Theme Service Adapter
 	themeService := theme.NewOmarchyService("")
 
-	// Check if user specifically requested web server mode via CLI flag
-	if len(os.Args) > 1 && (os.Args[1] == "--web" || os.Args[1] == "-web" || os.Args[1] == "serve") {
+	// Check if user specifically requested web server mode
+	if cfg.WebMode {
 		return runWebServer(cfg, dailyGoalUseCase, themeService)
+	}
+
+	// Start background web server alongside desktop GUI if --with-web was passed
+	if cfg.WithWeb {
+		go func() {
+			if err := runWebServer(cfg, dailyGoalUseCase, themeService); err != nil && !errors.Is(err, http.ErrServerClosed) {
+				log.Printf("Background web server error: %v", err)
+			}
+		}()
 	}
 
 	logDesktopBanner(cfg)
 
 	// 4. Primary Adapter (Native Desktop GUI)
-	desktopApp := guiadapter.NewDesktopApp(dailyGoalUseCase, themeService)
+	desktopApp := guiadapter.NewDesktopApp(dailyGoalUseCase, themeService, cfg.MetasDir)
 	desktopApp.Run()
 
 	return nil
@@ -66,6 +79,9 @@ func logDesktopBanner(cfg *config.Config) {
 	log.Printf("==================================================")
 	log.Printf(" Diary - Native Desktop Application (Omarchy / Hyprland)")
 	log.Printf(" Local storage: %s", cfg.MetasDir)
+	if cfg.WithWeb {
+		log.Printf(" Web server running concurrently on: http://localhost:%s", cfg.Port)
+	}
 	log.Printf("==================================================")
 }
 

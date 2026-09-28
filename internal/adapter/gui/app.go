@@ -24,6 +24,7 @@ type DesktopApp struct {
 	window       fyne.Window
 	useCase      usecase.DailyGoalUseCase
 	themeService omarchytheme.Service
+	metasDir     string
 
 	currentDate domain.Date
 	currentGoal *domain.DailyGoal
@@ -38,9 +39,14 @@ type DesktopApp struct {
 }
 
 // NewDesktopApp initializes the native desktop application.
-func NewDesktopApp(useCase usecase.DailyGoalUseCase, themeService omarchytheme.Service) *DesktopApp {
+func NewDesktopApp(useCase usecase.DailyGoalUseCase, themeService omarchytheme.Service, metasDir ...string) *DesktopApp {
 	if themeService == nil {
 		themeService = omarchytheme.NewOmarchyService("")
+	}
+
+	dir := ""
+	if len(metasDir) > 0 {
+		dir = metasDir[0]
 	}
 
 	a := app.NewWithID("com.omarchy.diary")
@@ -59,11 +65,13 @@ func NewDesktopApp(useCase usecase.DailyGoalUseCase, themeService omarchytheme.S
 		window:       w,
 		useCase:      useCase,
 		themeService: themeService,
+		metasDir:     dir,
 		currentDate:  domain.Today(),
 	}
 
 	desktop.setupUI()
 	desktop.startThemeWatcher()
+	desktop.startSyncWatcher()
 
 	return desktop
 }
@@ -194,7 +202,7 @@ func (d *DesktopApp) renderGoals() {
 		emptyMsg := widget.NewLabelWithStyle("No goals for this day yet.\nAdd a new goal above to get started!", fyne.TextAlignCenter, fyne.TextStyle{Italic: true})
 		d.tasksBox.Add(container.NewCenter(emptyMsg))
 		d.tasksBox.Refresh()
-		d.statusLabel.SetText(fmt.Sprintf("File: ./metas/%s.md", d.currentDate.String()))
+		d.statusLabel.SetText(d.statusText(""))
 		return
 	}
 
@@ -226,7 +234,7 @@ func (d *DesktopApp) renderGoals() {
 	}
 
 	d.tasksBox.Refresh()
-	d.statusLabel.SetText(fmt.Sprintf("File: ./metas/%s.md (saved)", d.currentDate.String()))
+	d.statusLabel.SetText(d.statusText("saved"))
 }
 
 func (d *DesktopApp) addGoal(text string) {
@@ -292,6 +300,18 @@ func (d *DesktopApp) deleteGoal(idx int) {
 	d.renderGoals()
 }
 
+func (d *DesktopApp) statusText(suffix string) string {
+	dir := d.metasDir
+	if dir == "" {
+		dir = "~/metas"
+	}
+	base := fmt.Sprintf("File: %s/%s.md", dir, d.currentDate.String())
+	if suffix != "" {
+		return fmt.Sprintf("%s (%s)", base, suffix)
+	}
+	return base
+}
+
 func (d *DesktopApp) formatDateHeading(dt domain.Date) string {
 	t := dt.Time()
 	return t.Format("Monday, 02 January 2006")
@@ -307,8 +327,57 @@ func (d *DesktopApp) startThemeWatcher() {
 			info := d.themeService.GetCurrentTheme()
 			if info.ThemeName != lastThemeName {
 				lastThemeName = info.ThemeName
-				d.fyneApp.Settings().SetTheme(NewOmarchyTheme(info))
+				fyne.Do(func() {
+					d.fyneApp.Settings().SetTheme(NewOmarchyTheme(info))
+				})
 			}
 		}
 	}()
+}
+
+func (d *DesktopApp) startSyncWatcher() {
+	go func() {
+		ticker := time.NewTicker(2500 * time.Millisecond)
+		defer ticker.Stop()
+
+		for range ticker.C {
+			if d.currentGoal == nil {
+				continue
+			}
+			target := d.currentDate
+			goal, err := d.useCase.GetDailyGoals(context.Background(), target.String())
+			if err != nil {
+				continue
+			}
+
+			if !goalsEqual(d.currentGoal, goal) {
+				fyne.Do(func() {
+					if d.currentDate == target && !goalsEqual(d.currentGoal, goal) {
+						d.currentGoal = goal
+						d.renderGoals()
+					}
+				})
+			}
+		}
+	}()
+}
+
+func goalsEqual(a, b *domain.DailyGoal) bool {
+	if a == nil && b == nil {
+		return true
+	}
+	if a == nil || b == nil {
+		return false
+	}
+	itemsA := a.Items()
+	itemsB := b.Items()
+	if len(itemsA) != len(itemsB) {
+		return false
+	}
+	for i := range itemsA {
+		if itemsA[i].Text() != itemsB[i].Text() || itemsA[i].Done() != itemsB[i].Done() {
+			return false
+		}
+	}
+	return true
 }

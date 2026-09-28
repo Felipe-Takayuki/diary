@@ -1,4 +1,4 @@
-.PHONY: all build run test test-race test-cover fmt vet clean
+.PHONY: all build run web run-web test test-race test-cover fmt vet clean install
 
 all: test build
 
@@ -8,6 +8,12 @@ build:
 
 run:
 	go run .
+
+web:
+	go run . --web
+
+run-web:
+	go run . --web
 
 test:
 	go test -v ./...
@@ -30,7 +36,7 @@ clean:
 
 install: build
 	@mkdir -p $(HOME)/.local/bin $(HOME)/.local/share/applications $(HOME)/.local/share/icons/hicolor/scalable/apps $(HOME)/.local/share/icons/hicolor/64x64/apps
-	cp bin/diary $(HOME)/.local/bin/diary
+	install -m 755 bin/diary $(HOME)/.local/bin/diary
 	cp assets/com.omarchy.diary.desktop $(HOME)/.local/share/applications/
 	cp assets/icon.svg $(HOME)/.local/share/icons/hicolor/scalable/apps/diary.svg
 	cp assets/icon.png $(HOME)/.local/share/icons/hicolor/64x64/apps/diary.png

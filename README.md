@@ -108,9 +108,19 @@ This compiles the binary to `~/.local/bin/diary`, installs the `.desktop` deskto
 If you prefer running a local browser server:
 
 ```bash
-./bin/diary --web
-# Or run with: go run . --web
+# Using the installed binary from anywhere:
+diary --web
+# Or: diary web -p 8080
+
+# Or via Makefile inside the project:
+make web
+
 # Available at http://localhost:8080
+```
+
+To run both the Desktop GUI and background Web server simultaneously:
+```bash
+diary --with-web
 ```
 
 ---
@@ -128,18 +138,31 @@ If you prefer running a local browser server:
 
 ---
 
-## Configuration
+## Configuration & Flags
 
-You can configure execution via environment variables:
+All modes (Desktop, Web, and CLI) automatically share the same canonical data folder: `~/metas`.
+
+### CLI Flags & Commands
+
+| Command / Flag | Description |
+|---|---|
+| `diary` | Opens the native Desktop GUI |
+| `diary --web` (or `diary web`, `diary -w`) | Starts headless HTTP web server |
+| `diary --with-web` | Opens Desktop GUI and starts background web server |
+| `-p, --port <port>` | Sets web server port (default: `8080`) |
+| `-d, --dir <path>` | Sets Markdown storage directory (default: `~/metas`) |
+| `-h, --help` | Displays command-line help |
+
+### Environment Variables
 
 | Variable | Default | Description |
 |---|---|---|
-| `PORT` | `8080` | Port used by the HTTP server in headless web mode |
-| `GOALS_DIR` (or `METAS_DIR`) | `./metas` | Path to the directory where Markdown files are stored |
+| `PORT` | `8080` | Port used by the HTTP server in web mode |
+| `GOALS_DIR` (or `METAS_DIR`) | `~/metas` | Path to the directory where Markdown files are stored |
 
 Example running with a custom data folder:
 ```bash
-GOALS_DIR=~/Documents/MyGoals go run .
+GOALS_DIR=~/Documents/MyGoals diary
 ```
 
 ---
